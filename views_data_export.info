@@ -1,0 +1,6 @@
+; $Id$
+name = Views Data Export
+description = "Plugin to export views data into various file formats"
+dependencies[] = views
+package = Views
+core = 6.x
