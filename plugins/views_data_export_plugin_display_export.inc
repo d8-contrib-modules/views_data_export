@@ -635,12 +635,15 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
    */
   protected function outputfile_create() {
 
-    $path = tempnam(realpath(file_directory_temp() . '/views_plugin_display'), 'views_data');
+    $dir = file_directory_temp() . '/views_plugin_display';
 
     // Make sure the directory exists first.
-    if (!file_check_directory(dirname($path), FILE_CREATE_DIRECTORY)) {
-      $this->abort_export(t('Could not create temporary directory for result export (@file). Check permissions.', array ('@file' => $path)));
+    if (!file_check_directory($dir, FILE_CREATE_DIRECTORY)) {
+      $this->abort_export(t('Could not create temporary directory for result export (@dir). Check permissions.', array ('@dir' => $dir)));
     }
+
+    // TODO: do we need the realpath here?
+    $path = tempnam(realpath($dir), 'views_data');
 
     // Create the file.
     if (($output_filename = file_create_path($path)) === FALSE) {
