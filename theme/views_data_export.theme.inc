@@ -303,6 +303,7 @@ function template_preprocess_views_data_export_xml_body(&$vars) {
   }
 
   foreach ($vars['header'] as $field => $header) {
+    $vars['xml_tag'][$field] = $header;
     if ($vars['options']['transform']) {
       switch ($vars['options']['transform_type']) {
         case 'dash':
@@ -312,15 +313,44 @@ function template_preprocess_views_data_export_xml_body(&$vars) {
           $vars['xml_tag'][$field] = str_replace(' ', '_', $header);
           break;
         case 'camel':
-          $vars['xml_tag'][$field] = str_replace(' ', '', ucwords($header));
+          $vars['xml_tag'][$field] = str_replace(' ', '', ucwords(strtolower($header)));
+          // Convert the very first character of the string to lowercase.
           $vars['xml_tag'][$field][0] = strtolower($vars['xml_tag'][$field][0]);
           break;
         case 'pascal':
-          $vars['xml_tag'][$field] = str_replace(' ', '', ucwords($header));
+          $vars['xml_tag'][$field] = str_replace(' ', '', ucwords(strtolower($header)));
           break;
       }
     }
+    // We should always try to output valid XML.
+    $vars['xml_tag'][$field] = _views_data_export_xml_tag_clean($vars['xml_tag'][$field]);
   }
+}
+
+/**
+ * Returns a valid XML tag formed from the given input.
+ *
+ * @param $tag The string that should be made into a valid XML tag.
+ * @return The valid XML tag or an empty string if the string contained no valid
+ * XML tag characters.
+ */
+function _views_data_export_xml_tag_clean($tag) {
+
+  // This regex matches characters that are not valid in XML tags, and the
+  // unicode ones that are. We don't bother with unicode, because it would so
+  // the preg_replace down a lot.
+  static $invalid_tag_chars_regex = '#[^\:A-Za-z_\-.0-9]+#';
+
+  // These characters are not valid at the start of an XML tag:
+  static $invalid_start_chars = '-.0123456789';
+
+  // Convert invalid chars to '-':
+  $tag = preg_replace($invalid_tag_chars_regex, '-', $tag);
+
+  // Need to trim invalid characters from the start of the string:
+  $tag = ltrim($tag, $invalid_start_chars);
+
+  return $tag;
 }
 
 /**

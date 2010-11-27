@@ -62,7 +62,7 @@ class views_data_export_plugin_style_export_xml extends views_data_export_plugin
       '#type' => 'checkbox',
       '#title' => t('Transform spaces'),
       '#default_value' => $this->options['transform'],
-      '#description' => t('Transform spaces to valid XML in field labels (spaces create invalid XML markup).'),
+      '#description' => t('Transform spaces to valid XML in field labels (spaces create invalid XML markup). Note that invalid XML tag characters will always be converted.'),
     );
     $form['transform_type'] = array(
       '#type' => 'select',
