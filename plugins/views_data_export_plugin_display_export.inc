@@ -60,7 +60,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
     $options = parent::option_definition();
     $options['use_batch'] = array('default' => TRUE);
     $options['items_per_page'] = array('default' => '0');
-    $options['style_plugin']['default'] = 'views_csv';
+    $options['style_plugin']['default'] = 'views_data_export_csv';
 
     if (isset($options['defaults']['default']['items_per_page'])) {
       $options['defaults']['default']['items_per_page'] = FALSE;
