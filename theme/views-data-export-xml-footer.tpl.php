@@ -1,1 +1,1 @@
-</xml>
+</<?php print $root_node; ?>>

@@ -13,9 +13,9 @@
  */
 ?>
 <?php foreach ($themed_rows as $count => $row): ?>
-  <node>
+  <<?php print $item_node; ?>>
 <?php foreach ($row as $field => $content): ?>
     <<?php print $xml_tag[$field]; ?>><?php print $content; ?></<?php print $xml_tag[$field]; ?>>
 <?php endforeach; ?>
-  </node>
+  </<?php print $item_node; ?>>
 <?php endforeach; ?>
