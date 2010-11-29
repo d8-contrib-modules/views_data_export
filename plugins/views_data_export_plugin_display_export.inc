@@ -227,7 +227,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
     $this->batched_execution_state->fid = $this->outputfile_create();
 
     // Initialize the progress counter
-    $this->batched_execution_state->sandbox['max'] = db_result(db_query('SELECT COUNT(*) FROM {' . $this->index_tablename() . '}'));
+    $this->batched_execution_state->sandbox['max'] = db_query('SELECT COUNT(*) FROM {' . $this->index_tablename() . '}')->fetchField();
     // Record the time we started.
     list($usec, $sec) = explode(' ', microtime());
     $this->batched_execution_state->sandbox['started'] = (float) $usec + (float) $sec;
@@ -241,7 +241,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
       // Get the path of the attached display:
       $querystring['return-url'] = $this->view->display[$_GET['attach']]->handler->get_path();
     }
-    $querystring_built = drupal_query_string_encode($querystring);
+    $querystring_built = drupal_http_build_query(drupal_get_query_parameters($querystring));
 
     //Set the batch off
     $batch = array(
@@ -265,9 +265,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
     $batch['view_name'] = $this->view->name;
     $batch['display_id'] = $this->view->current_display;
     $batch['eid'] = $this->batched_execution_state->eid;
-    $batch['__drupal_alter_by_ref']['final_destination'] = &$final_destination;
-    $batch['__drupal_alter_by_ref']['querystring'] = &$querystring_built;
-    drupal_alter('views_data_export_batch', $batch);
+    drupal_alter('views_data_export_batch', $batch, $final_destination, $querystring_built);
 
     // Modules may have cleared out $batch, indicating that we shouldn't process further.
     if (!empty($batch)) {
@@ -300,10 +298,12 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
         // Remove rendered results from our index
         if (count($this->view->result) && ($sandbox['weight_field_alias'])) {
           $last = end($this->view->result);
-          db_query('DELETE FROM {' . $this->index_tablename() . '} WHERE ' . $sandbox['weight_field_alias'] . '  <= %d', $last->{$sandbox['weight_field_alias']});
+          db_delete($this->index_tablename())
+            ->condition($sandbox['weight_field_alias'], $last->{$sandbox['weight_field_alias']}, '<=')
+            ->execute();
 
           // Update progress.
-          $progress = db_result(db_query('SELECT COUNT(*) FROM {' . $this->index_tablename() . '}'));
+          $progress = db_query('SELECT COUNT(*) FROM {' . $this->index_tablename() . '}')->fetchField();
           $progress = 0.999998 - ($progress / $sandbox['max']);
           $sandbox['finished'] = max($progress, 0);
         }
@@ -413,11 +413,11 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
           // TODO: Handle external databases.
           $result = db_query_range('SELECT * FROM {' . $this->index_tablename() . '} ORDER BY ' . $this->batched_execution_state->sandbox['weight_field_alias'] . ' ASC', 0, 100);
           $this->view->result = array();
-          while ($item_arr = db_fetch_array($result)) {
+          foreach ($result as $item_hashed) {
             $item = new stdClass();
             // We had to shorten some of the column names in the index, restore
             // those now.
-            foreach ($item_arr as $hash => $value) {
+            foreach ($item_hashed as $hash => $value) {
               if (isset($this->batched_execution_state->sandbox['field_aliases'][$hash])) {
                 $item->{$this->batched_execution_state->sandbox['field_aliases'][$hash]} = $value;
               }
@@ -440,7 +440,10 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
   function render_complete() {
     $return_path = empty($_GET['return-url']) ? '' : $_GET['return-url'];
 
-    return theme('views_data_export_complete_page', url($this->get_option('path'), array('query' => 'download=1&eid=' . $this->batched_execution_state->eid)), $this->errors, $return_path);
+    return theme('views_data_export_complete_page', array(
+      'file' => url($this->get_option('path'), array('query' => 'download=1&eid=' . $this->batched_execution_state->eid)),
+      'errors' => $this->errors,
+      'return_url' => $return_path));
   }
 
   /**
@@ -606,7 +609,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
   function remove_index() {
     $ret = array();
     if (db_table_exists($this->index_tablename())) {
-      db_drop_table($ret, $this->index_tablename());
+      db_drop_table($this->index_tablename());
     }
   }
 
@@ -635,23 +638,17 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
    */
   protected function outputfile_create() {
 
-    $dir = file_directory_temp() . '/views_plugin_display';
+    $dir = 'temporary://views_plugin_display';
 
     // Make sure the directory exists first.
-    if (!file_check_directory($dir, FILE_CREATE_DIRECTORY)) {
+    if (!file_prepare_directory($dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
       $this->abort_export(t('Could not create temporary directory for result export (@dir). Check permissions.', array ('@dir' => $dir)));
     }
 
-    // TODO: do we need the realpath here?
-    $path = tempnam(realpath($dir), 'views_data');
-
-    // Create the file.
-    if (($output_filename = file_create_path($path)) === FALSE) {
-      $this->abort_export(t('Could not create temporary output file for result export (@file). Check permissions.', array ('@file' => $path)));
-    }
+    $path = drupal_tempnam($dir, 'views_data');
 
     // Save the file into the DB.
-    $file = $this->file_save_file($output_filename);
+    $file = $this->file_save_file($path);
 
     return $file->fid;
   }
@@ -661,8 +658,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
    */
   protected function outputfile_write($string) {
     $output_file = $this->outputfile_path();
-    $handle = fopen($output_file, 'a');
-    if (fwrite($handle, $string) === FALSE) {
+    if (file_put_contents($output_file, $string, FILE_APPEND) === FALSE) {
       $this->abort_export(t('Could not write to temporary output file for result export (@file). Check permissions.', array ('@file' => $output_file)));
     }
   }
@@ -687,22 +683,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
     *   A file object.
     */
   function file_load($fid) {
-    if (empty($fid)) {
-      return array('fid' => 0, 'filepath' => '', 'filename' => '', 'filemime' => '', 'filesize' => 0);
-    }
-
-    if (is_numeric($fid)) {
-      $file = db_fetch_object(db_query('SELECT f.* FROM {files} f WHERE f.fid = %d', $fid));
-    }
-    else {
-      $file = db_fetch_object(db_query("SELECT f.* FROM {files} f WHERE f.filepath = '%s'", $fid));
-    }
-
-    if (!$file) {
-      $file = (object) array('fid' => 0, 'filepath' => '', 'filename' => '', 'filemime' => '', 'filesize' => 0);
-    }
-
-    return !empty($file) ? $file : FALSE;
+    return file_load($fid);
   }
 
   /**
@@ -714,38 +695,11 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
   *
   * @param $filepath
   *   The local file path of the file to be saved.
-  * @param $account
-  *   The user account object that should associated with the uploaded file.
   * @return
   *   An array containing the file information, or 0 in the event of an error.
   */
-  function file_save_file($filepath, $account = NULL) {
-    if (!isset($account)) {
-      $account = $GLOBALS['user'];
-    }
-
-    // Begin building file object.
-    $file = new stdClass();
-    $file->uid = $account->uid;
-    $file->filename = basename($filepath);
-    $file->filepath = $filepath;
-    $file->filemime = module_exists('mimedetect') ? mimedetect_mime($file) : file_get_mimetype($file->filename);
-
-    // Rename potentially executable files, to help prevent exploits.
-    if (preg_match('/\.(php|pl|py|cgi|asp|js)$/i', $file->filename) && (substr($file->filename, -4) != '.txt')) {
-      $file->filemime = 'text/plain';
-      $file->filepath .= '.txt';
-      $file->filename .= '.txt';
-    }
-
-    $file->filesize = filesize($filepath);
-
-    // If we made it this far it's safe to record this file in the database.
-    $file->status = FILE_STATUS_TEMPORARY;
-    $file->timestamp = time();
-    // Insert new record to the database.
-    drupal_write_record('files', $file);
-    return (object)$file;
+  function file_save_file($filepath) {
+    return file_save_data('', $filepath);
   }
 
   /**
