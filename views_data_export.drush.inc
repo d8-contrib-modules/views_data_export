@@ -16,6 +16,13 @@ function views_data_export_drush_command() {
       'display_id' => 'The id of the views_data_export display to execute on the view',
       'output_file' => 'The file to write the results to - will be overwritten if it already exists',
     ),
+    'options' => array (
+      '--format' => 'csv,doc,txt,xls or xml. These options are ignored if the display_id passed is a "views_data_export" display.',
+      '--separator' => 'csv only: What character separates the fields (default:,)',
+      '--trim-whitespace' => 'csv only: Trim whitespace from either side of fields (default:1)',
+      '--header-row' => 'csv only: Make the first row a row of headers (default:1)',
+      '--quote-values' => 'csv only: Surround each field in quotes (default:1)',
+    ),
     'examples' => array (
       'drush views-data-export myviewname views_data_export_1 output.csv' => 'Export myviewname:views_data_export_1 and write the output to output.csv in the current directory',
     ),
@@ -67,6 +74,12 @@ function drush_views_data_export_validate() {
   if (!$view->set_display($args[1])) {
     return drush_set_error('VIEW_DOES_NOT_EXIST', dt('The view !view does not have the !display display.', array ('!view' => $args[0], '!display' => $args[1])));
   }
+  
+  $format = drush_get_option('format');
+  $valid_formats = array('csv', 'doc', 'txt', 'xls', 'xml');
+  if (!empty($format) && !in_array($format, $valid_formats)) {
+    return drush_set_error('VIEWS_DATA_EXPORT_INVALID_OPTION', dt('The "--format" option is invalid, please supply one of the following: !formats', array('!formats' => implode(', ', $valid_formats))));
+  }
 }
 
 /**
@@ -78,6 +91,43 @@ function drush_views_data_export_validate() {
 function drush_views_data_export($view_name, $display_id, $output_file) {
 
   $view = views_get_view($view_name);
+
+  // If the given display_id is not views_data_alter then
+  // we programatically clone it to a views_data_alter display
+  // and then execute that one instead
+  if ($view->display[$display_id]->display_plugin != 'views_data_export') {
+    //drush_log("Display '$display_id' is not views_data_export. Making one that is and executing that instead =).", 'success');
+    
+    $format = drush_get_option('format');
+    $settings = array();
+    switch ($format) {
+      case 'doc':
+      case 'xls':
+      case 'xml':
+      case 'txt':
+        $settings['display_options']['style_plugin'] = 'views_data_export_' . $format;
+        break;
+      case 'csv':
+      default:
+      $settings['display_options']['style_plugin'] = 'views_data_export_csv';
+      if ($separator = drush_get_option('separator')) {
+        $settings['display_options']['style_options']['separator'] = $separator;
+      }
+      if (!$trim = drush_get_option('trim-whitespace')) {
+        $settings['display_options']['style_options']['trim'] = 0;
+      }
+      if (!$header = drush_get_option('header-row')) {
+        $settings['display_options']['style_options']['header'] = 0;
+      }
+      if (!$quote = drush_get_option('quote-values')) {
+        $settings['display_options']['style_options']['quote'] = 0;
+      }
+      // Seperator
+    }
+    
+    $display_id = _drush_views_data_export_clone_display($view, $display_id, $settings);
+  }
+  
   $view->set_display($display_id);
 
   // We execute the view normally, and take advantage
@@ -173,4 +223,115 @@ function _drush_views_data_export_batch_finished($eid, $output_file, &$context) 
     drush_set_error('VIEWS_DATA_EXPORT_COPY_ERROR', dt("The file could not be copied to the selected destination"));
   }
 
+}
+
+
+/**
+ * Helper function that takes a view and returns a clone of it
+ * that has cloned a given display to one of type views_data_export
+ *
+ * @param &$view
+ *   Modified to contain the new display
+ *
+ * @return
+ *   The new display_id
+ */
+function _drush_views_data_export_clone_display(&$view, $display_id, $settings = array()) {
+  
+  // Create the new display
+  $new_display_id = _drush_views_data_export_generate_display_id($view, 'views_data_export');
+  $view->display[$new_display_id] = drupal_clone($view->display[$display_id]);
+  
+  // Ensure we have settings we'll need for our display
+  $default_settings = array (
+    'id' => $new_display_id,
+    'display_plugin' => 'views_data_export',
+    'position' => 99,
+    'display_options' => array (
+      'style_plugin' => 'views_data_export_csv',
+      'style_options' => array(
+        'attach_text' => 'CSV',
+        'provide_file' => 1,
+        'filename' => 'view-%view.csv',
+        'parent_sort' => 1,
+        'separator' => ',',
+        'quote' => 1,
+        'trim' => 1,
+        'header' => 1,
+      ),
+      'use_batch' => 1,
+      'path' => '',
+      'displays' => array (
+        'default' => 'default',
+      ),
+    ),
+  );
+  $settings = array_replace_recursive($default_settings, $settings);
+  
+  $view->display[$new_display_id] = (object)array_replace_recursive((array)$view->display[$new_display_id], $settings);
+  
+  return $new_display_id;
+}
+
+
+/**
+ * Generate a display id of a certain plugin type.
+ * See http://drupal.org/files/issues/348975-clone-display.patch
+ *
+ * @param $type
+ *   Which plugin should be used for the new display id.
+ */
+function _drush_views_data_export_generate_display_id($view, $type) {
+  // 'default' is singular and is unique, so just go with 'default'
+  // for it. For all others, start counting.
+  if ($type == 'default') {
+    return 'default';
+  }
+  // Initial id.
+  $id = $type . '_1';
+  $count = 1;
+
+  // Loop through IDs based upon our style plugin name until
+  // we find one that is unused.
+  while (!empty($view->display[$id])) {
+    $id = $type . '_' . ++$count;
+  }
+
+  return $id;
+}
+
+/**
+ * If we're using PHP < 5.3.0 then we'll need
+ * to define this function ourselves.
+ * See: http://phpmyanmar.com/phpcodes/manual/function.array-replace-recursive.php
+ */
+if (!function_exists('array_replace_recursive')) {
+function array_replace_recursive($array, $array1) {
+  // Get array arguments
+  $arrays = func_get_args();
+
+  // Define the original array
+  $original = array_shift($arrays);
+
+  // Loop through arrays
+  foreach ($arrays as $array) {
+    // Loop through array key/value pairs
+    foreach ($array as $key => $value) {
+      // Value is an array
+      if (is_array($value)) {
+        // Traverse the array; replace or add result to original array
+        $original[$key] = array_replace_recursive($original[$key], $array[$key]);
+      }
+
+      // Value is not an array
+      else {
+        // Replace or add current value to original array
+        $original[$key] = $value;
+      }
+    }
+  }
+
+  // Return the joined array
+  return $original;
+}
 }
