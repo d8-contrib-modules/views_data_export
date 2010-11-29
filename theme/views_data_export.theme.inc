@@ -44,7 +44,8 @@ function theme_views_data_export_feed_icon($variables) {
  * @param $file
  *  Link to output file
  */
-function theme_views_data_export_complete_page($file, $errors = array(), $return_url = '') {
+function theme_views_data_export_complete_page($variables) {
+  extract($variables, EXTR_SKIP);
   drupal_set_title(t('Data export successful'));
   drupal_set_html_head('<meta http-equiv="refresh" content="3;url='. check_plain($file) . '" />');
   $output = '';
