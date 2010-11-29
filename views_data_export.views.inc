@@ -57,6 +57,9 @@ function views_data_export_views_plugins() {
         'export headers' => array('Content-type' => 'text/csv; charset=utf-8'),
         // Views Data Export element mostly used for creating some additional classes and template names.
         'export feed type' => 'csv',
+        'export feed text' => 'CSV',
+        'export feed file' => 'view-%view.csv',
+        'export feed icon' => drupal_get_path('module', 'views_data_export') . '/images/csv.png',
         'additional themes' => array(
           'views_data_export_csv_header' => 'style',
           'views_data_export_csv_body' => 'style',
@@ -67,9 +70,12 @@ function views_data_export_views_plugins() {
       'views_data_export_doc' => array(
         'title' => t('DOC file'),
         'help' => t('Display the view as a doc file.'),
-        'handler' => 'views_data_export_plugin_style_export_doc',
+        'handler' => 'views_data_export_plugin_style_export',
         'export headers' => array('Content-Type' => 'application/msword'),
         'export feed type' => 'doc',
+        'export feed text' => 'Word Document',
+        'export feed file' => 'view-%view.doc',
+        'export feed icon' => drupal_get_path('module', 'views_data_export') . '/images/doc.png',
         'additional themes' => array(
           'views_data_export_doc_header' => 'style',
           'views_data_export_doc_body' => 'style',
@@ -80,9 +86,12 @@ function views_data_export_views_plugins() {
       'views_data_export_txt' => array(
         'title' => t('TXT file'),
         'help' => t('Display the view as a txt file.'),
-        'handler' => 'views_data_export_plugin_style_export_txt',
+        'handler' => 'views_data_export_plugin_style_export',
         'export headers' => array('Content-Type' => 'text/plain'),
         'export feed type' => 'txt',
+        'export feed text' => 'Plain Text Document',
+        'export feed file' => 'view-%view.txt',
+        'export feed icon' => drupal_get_path('module', 'views_data_export') . '/images/csv.txt',
         'additional themes' => array(
           'views_data_export_txt_header' => 'style',
           'views_data_export_txt_body' => 'style',
@@ -93,9 +102,12 @@ function views_data_export_views_plugins() {
       'views_data_export_xls' => array(
         'title' => t('XLS file'),
         'help' => t('Display the view as a xls file.'),
-        'handler' => 'views_data_export_plugin_style_export_xls',
+        'handler' => 'views_data_export_plugin_style_export',
         'export headers' => array('Content-Type' => 'application/vnd.ms-excel'),
         'export feed type' => 'xls',
+        'export feed text' => 'XLS',
+        'export feed file' => 'view-%view.xls',
+        'export feed icon' => drupal_get_path('module', 'views_data_export') . '/images/xls.png',
         'additional themes' => array(
           'views_data_export_xls_header' => 'style',
           'views_data_export_xls_body' => 'style',
@@ -109,6 +121,9 @@ function views_data_export_views_plugins() {
         'handler' => 'views_data_export_plugin_style_export_xml',
         'export headers' => array('Content-Type' => 'text/xml'),
         'export feed type' => 'xml',
+        'export feed text' => 'XML',
+        'export feed file' => 'view-%view.xml',
+        'export feed icon' => drupal_get_path('module', 'views_data_export') . '/images/xml.png',
         'additional themes' => array(
           'views_data_export_xml_header' => 'style',
           'views_data_export_xml_body' => 'style',

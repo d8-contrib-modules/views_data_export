@@ -11,20 +11,6 @@
  * @ingroup views_style_plugins
  */
 class views_data_export_plugin_style_export_csv extends views_data_export_plugin_style_export {
-  var $feed_text = 'CSV';
-  var $feed_file = 'view-%view.csv';
-
-  /**
-   * Initialize plugin.
-   *
-   * Set feed image for shared rendering later.
-   */
-  function init(&$view, &$display, $options = NULL) {
-    parent::init($view, $display, $options = NULL);
-    $this->feed_image = drupal_get_path('module', 'views_data_export') . '/images/csv.png';
-    $this->feed_file = 'view-%view.csv';
-    $this->feed_text = 'CSV';
-  }
 
   /**
    * Set options fields and default values.
