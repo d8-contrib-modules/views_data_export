@@ -50,15 +50,15 @@ function views_data_export_schema() {
         'description' => 'The current state of the batch.',
       ),
       'sandbox' => array(
-        'type' => 'text',
-        'default' => '',
-        'not null' => TRUE,
+        'type' => 'blob',
+        'not null' => FALSE,
+        'size' => 'big',
         'serialize' => TRUE,
       ),
     ),
     'primary key' => array('eid'),
   );
-  
+
   $schema['views_data_export_object_cache'] = array(
     'description' => 'A modified version of the views_object_cache that ignores session id.',
     'fields' => array(
@@ -88,23 +88,10 @@ function views_data_export_schema() {
   return $schema;
 }
 
-
-/**
- * Implementation of hook_install()
- */
-function views_data_export_install() {
-  drupal_install_schema('views_data_export');
-}
-
-
 /**
  * Implementation of hook_uninstall()
  */
 function views_data_export_uninstall() {
-  
   //Clean up any tables we may have left around
-  views_data_export_garbage_collect(0, -1);
-  
-  //Remove our base table
-  drupal_uninstall_schema('views_data_export');
+  //views_data_export_garbage_collect(0, -1);
 }

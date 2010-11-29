@@ -54,7 +54,7 @@ function views_data_export_views_plugins() {
         'help' => t('Display the view as a comma separated list.'),
         'handler' => 'views_data_export_plugin_style_export_csv',
         // Views Data Export element that will be used to set additional headers when serving the feed.
-        'export headers' => array('Content-type: text/csv; charset=utf-8'),
+        'export headers' => array('Content-type' => 'text/csv; charset=utf-8'),
         // Views Data Export element mostly used for creating some additional classes and template names.
         'export feed type' => 'csv',
         'additional themes' => array(
@@ -68,7 +68,7 @@ function views_data_export_views_plugins() {
         'title' => t('DOC file'),
         'help' => t('Display the view as a doc file.'),
         'handler' => 'views_data_export_plugin_style_export_doc',
-        'export headers' => array('Content-Type: application/msword'),
+        'export headers' => array('Content-Type' => 'application/msword'),
         'export feed type' => 'doc',
         'additional themes' => array(
           'views_data_export_doc_header' => 'style',
@@ -81,7 +81,7 @@ function views_data_export_views_plugins() {
         'title' => t('TXT file'),
         'help' => t('Display the view as a txt file.'),
         'handler' => 'views_data_export_plugin_style_export_txt',
-        'export headers' => array('Content-Type: text/plain'),
+        'export headers' => array('Content-Type' => 'text/plain'),
         'export feed type' => 'txt',
         'additional themes' => array(
           'views_data_export_txt_header' => 'style',
@@ -94,7 +94,7 @@ function views_data_export_views_plugins() {
         'title' => t('XLS file'),
         'help' => t('Display the view as a xls file.'),
         'handler' => 'views_data_export_plugin_style_export_xls',
-        'export headers' => array('Content-Type: application/vnd.ms-excel'),
+        'export headers' => array('Content-Type' => 'application/vnd.ms-excel'),
         'export feed type' => 'xls',
         'additional themes' => array(
           'views_data_export_xls_header' => 'style',
@@ -107,7 +107,7 @@ function views_data_export_views_plugins() {
         'title' => t('XML file'),
         'help' => t('Display the view as a txt file.'),
         'handler' => 'views_data_export_plugin_style_export_xml',
-        'export headers' => array('Content-Type: text/xml'),
+        'export headers' => array('Content-Type' => 'text/xml'),
         'export feed type' => 'xml',
         'additional themes' => array(
           'views_data_export_xml_header' => 'style',

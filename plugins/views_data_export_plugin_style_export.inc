@@ -68,7 +68,7 @@ class views_data_export_plugin_style_export extends views_plugin_style {
       '#title' => t('Filename'),
       '#default_value' => $this->options['filename'],
       '#description' => t('The filename that will be suggested to the browser for downloading purposes. %view will be replaced with the view name.'),
-      '#process' => array('views_process_dependency'),
+      '#process' => array('ctools_dependent_process'),
       '#dependency' => array(
         'edit-style-options-provide-file' => array(TRUE),
       ),
@@ -104,11 +104,12 @@ class views_data_export_plugin_style_export extends views_plugin_style {
     if ($this->options['parent_sort']) {
       $query['attach'] = $display_id;
     }
-    $this->view->feed_icon .= theme($theme_pattern,
-      $this->feed_image,
-      $this->view->get_url(NULL, $path),
-      $query,
-      $this->options['attach_text']
+    $this->view->feed_icon .= theme($theme_pattern, array(
+        'image_path' => $this->feed_image,
+        'url' => $this->view->get_url(NULL, $path),
+        'query' => $query,
+        'text' => $this->options['attach_text'],
+      )
     );
   }
 
@@ -161,20 +162,23 @@ class views_data_export_plugin_style_export extends views_plugin_style {
     $rows['header'] = $this->render_header();
     $rows['body'] = $this->render_body();
     $rows['footer'] = $this->render_footer();
-    $output .= theme($this->theme_functions(), $this->view, $this->options, $rows, $title);
+    $title = '';
+    $output .= theme($this->theme_functions(), array('view' => $this->view, 'options' => $this->options, 'rows' => $rows, 'title' => $title));
     return $output;
   }
 
   function render_header() {
     $rows = array();
-    $output .= theme($this->definition['additional themes base'] . '_header', $this->view, $this->options, $rows, $title);
+    $title = '';
+    $output .= theme($this->definition['additional themes base'] . '_header', array('view' => $this->view, 'options' => $this->options, 'rows' => $rows, 'title' => $title));
 
     return $output;
   }
 
   function render_footer() {
     $rows = array();
-    $output .= theme($this->definition['additional themes base'] . '_footer', $this->view, $this->options, $rows, $title);
+    $title = '';
+    $output .= theme($this->definition['additional themes base'] . '_footer', array('view' => $this->view, 'options' => $this->options, 'rows' => $rows, 'title' => $title));
 
     return $output;
   }
@@ -203,7 +207,8 @@ class views_data_export_plugin_style_export extends views_plugin_style {
         $rows = $records;
       }
 
-      $output .= theme($this->definition['additional themes base'] . '_body', $this->view, $this->options, $rows, $title);
+      $title = '';
+      $output .= theme($this->definition['additional themes base'] . '_body', array('view' => $this->view, 'options' => $this->options, 'rows' => $rows, 'title' => $title));
     }
     unset($this->view->row_index);
     return $output;
@@ -225,11 +230,11 @@ class views_data_export_plugin_style_export extends views_plugin_style {
    */
   function add_http_headers() {
 
-    drupal_set_header('Cache-Control: max-age=60, must-revalidate');
+    drupal_add_http_header('Cache-Control', 'max-age=60, must-revalidate');
 
     if (!empty($this->definition['export headers'])) {
-      foreach ($this->definition['export headers'] as $header) {
-        drupal_set_header($header);
+      foreach ($this->definition['export headers'] as $name => $value) {
+        drupal_add_http_header($name, $value);
       }
     }
 
@@ -240,7 +245,7 @@ class views_data_export_plugin_style_export extends views_plugin_style {
       );
 
       if ($filename) {
-        drupal_set_header('Content-Disposition: attachment; filename="'. $filename .'"');
+        drupal_add_http_header('Content-Disposition', 'attachment; filename="'. $filename .'"');
       }
     }
   }

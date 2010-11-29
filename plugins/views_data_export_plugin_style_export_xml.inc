@@ -74,7 +74,7 @@ class views_data_export_plugin_style_export_xml extends views_data_export_plugin
         'camel' => t('camelCase'),
         'pascal' => t('PascalCase'),
       ),
-      '#process' => array('views_process_dependency'),
+      '#process' => array('ctools_dependent_process'),
       '#dependency' => array(
         'edit-style-options-transform' => array(TRUE),
       ),
