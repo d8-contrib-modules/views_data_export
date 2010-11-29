@@ -59,8 +59,8 @@ function views_data_export_views_plugins() {
         'export feed type' => 'csv',
         'additional themes' => array(
           'views_data_export_csv_header' => 'style',
-          'views_data_export_csv_footer' => 'style',
           'views_data_export_csv_body' => 'style',
+          'views_data_export_csv_footer' => 'style',
         ),
         'additional themes base' => 'views_data_export_csv',
       ) + $style_defaults,
@@ -72,8 +72,8 @@ function views_data_export_views_plugins() {
         'export feed type' => 'doc',
         'additional themes' => array(
           'views_data_export_doc_header' => 'style',
-          'views_data_export_doc_footer' => 'style',
           'views_data_export_doc_body' => 'style',
+          'views_data_export_doc_footer' => 'style',
         ),
         'additional themes base' => 'views_data_export_doc',
       ) + $style_defaults,
@@ -85,8 +85,8 @@ function views_data_export_views_plugins() {
         'export feed type' => 'txt',
         'additional themes' => array(
           'views_data_export_txt_header' => 'style',
-          'views_data_export_txt_footer' => 'style',
           'views_data_export_txt_body' => 'style',
+          'views_data_export_txt_footer' => 'style',
         ),
         'additional themes base' => 'views_data_export_txt',
       ) + $style_defaults,
@@ -98,8 +98,8 @@ function views_data_export_views_plugins() {
         'export feed type' => 'xls',
         'additional themes' => array(
           'views_data_export_xls_header' => 'style',
-          'views_data_export_xls_footer' => 'style',
           'views_data_export_xls_body' => 'style',
+          'views_data_export_xls_footer' => 'style',
         ),
         'additional themes base' => 'views_data_export_xls',
       ) + $style_defaults,
@@ -111,8 +111,8 @@ function views_data_export_views_plugins() {
         'export feed type' => 'xml',
         'additional themes' => array(
           'views_data_export_xml_header' => 'style',
-          'views_data_export_xml_footer' => 'style',
           'views_data_export_xml_body' => 'style',
+          'views_data_export_xml_footer' => 'style',
         ),
         'additional themes base' => 'views_data_export_xml',
       ) + $style_defaults,
