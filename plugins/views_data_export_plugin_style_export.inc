@@ -22,7 +22,7 @@ class views_data_export_plugin_style_export extends views_plugin_style {
     $options = parent::option_definition();
 
     $options['attach_text'] = array(
-      'default' => $this->feed_text,
+      'default' => $this->definition['export feed text'],
       'translatable' => TRUE,
     );
     $options['provide_file'] = array(
@@ -30,7 +30,7 @@ class views_data_export_plugin_style_export extends views_plugin_style {
       'translatable' => FALSE,
     );
     $options['filename'] = array(
-      'default' => $this->feed_file,
+      'default' => $this->definition['export feed file'],
       'translatable' => FALSE,
     );
     $options['parent_sort'] = array(
@@ -105,7 +105,7 @@ class views_data_export_plugin_style_export extends views_plugin_style {
       $query['attach'] = $display_id;
     }
     $this->view->feed_icon .= theme($theme_pattern,
-      $this->feed_image,
+      $this->defintion['export feed icon'],
       $this->view->get_url(NULL, $path),
       $query,
       $this->options['attach_text']
