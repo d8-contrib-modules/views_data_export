@@ -170,6 +170,7 @@ class views_data_export_plugin_style_export extends views_plugin_style {
   function render_header() {
     $rows = array();
     $title = '';
+    $output = '';
     $output .= theme($this->definition['additional themes base'] . '_header', array('view' => $this->view, 'options' => $this->options, 'rows' => $rows, 'title' => $title));
 
     return $output;
@@ -178,6 +179,7 @@ class views_data_export_plugin_style_export extends views_plugin_style {
   function render_footer() {
     $rows = array();
     $title = '';
+    $output = '';
     $output .= theme($this->definition['additional themes base'] . '_footer', array('view' => $this->view, 'options' => $this->options, 'rows' => $rows, 'title' => $title));
 
     return $output;
