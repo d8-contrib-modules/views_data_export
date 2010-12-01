@@ -304,12 +304,14 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
 
           // Update progress.
           $progress = db_result(db_query('SELECT COUNT(*) FROM {' . $this->index_tablename() . '}'));
-          $progress = 0.999998 - ($progress / $sandbox['max']);
-          $sandbox['finished'] = max($progress, 0);
+          $progress = 0.99 - ($progress / $sandbox['max'] * 0.99);
+          $progress = ((int)floor($progress * 100000));
+          $progress = $progress / 100000;
+          $sandbox['finished'] = $progress;
         }
         else {
           // No more results.
-          $progress = 0.999998;
+          $progress = 0.99;
           $state->batch_state = VIEWS_DATA_EXPORT_FOOTER;
         }
         break;
