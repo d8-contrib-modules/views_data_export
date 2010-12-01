@@ -757,6 +757,8 @@ class views_data_export_plugin_query_default_batched extends views_plugin_query_
         foreach ($display_handler->batched_execution_state->sandbox['field_aliases'] as $hash => $alias) {
           $select_aliases[] = "cl.$alias AS $hash";
         }
+
+        // TODO: this could probably be replaced with a query extender and new query type.
         $args = $query->getArguments();
         $insert_query = 'CREATE TABLE {' . $display_handler->index_tablename() . '} SELECT @row := @row + 1 AS ' . $display_handler->batched_execution_state->sandbox['weight_field_alias'] . ', ' . implode(', ', $select_aliases) . ' FROM (' . (string)$query . ') AS cl, (SELECT @row := 0) AS r';
         db_query($insert_query, $args);
