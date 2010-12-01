@@ -669,8 +669,8 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
     if ($finished > 0) {
       $estimate_total = $diff / $finished;
       $stamp = max(1, $estimate_total - $diff);
-      // Round up to nearest 5 seconds.
-      $stamp = ceil($stamp / 5) * 5;
+      // Round up to nearest 30 seconds.
+      $stamp = ceil($stamp / 30) * 30;
       // Set the message in the batch context.
       return t('Time remaining: about @interval.', array('@interval' => format_interval($stamp)));
     }
