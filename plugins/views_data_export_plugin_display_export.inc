@@ -495,74 +495,16 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
     // Get views to build the query.
     $view->build();
 
-    // In views 2 there isn't actually an easy way to get the query that has
-    // been executed, so we'll have to duplicte a lot of the code from the
-    // view::execute() method.
-
-    // Let modules modify the view just prior to executing it.
-    foreach (module_implements('views_pre_execute') as $module) {
-      $function = $module . '_views_pre_execute';
-      $function($view);
+    // Change the query object to use our custom one.
+    $query = new views_data_export_plugin_query_default_batched();
+    // Copy the query over:
+    foreach ($view->query as $property => $value) {
+      $query->$property = $value;
     }
+    // Replace the query object.
+    $view->query = $query;
 
-    // only rewrite the query if we have an initial query to begin with.
-    if ($view->build_info['query']) {
-      $query = db_rewrite_sql($view->build_info['query'], $view->base_table, $view->base_field, array('view' => &$view));
-      $count_query = db_rewrite_sql($view->build_info['count_query'], $view->base_table, $view->base_field, array('view' => &$view));
-    }
-    $args = $view->build_info['query_args'];
-
-    vpr($query);
-
-    if ($query) {
-      $replacements = module_invoke_all('views_query_substitutions', $view);
-      $query = str_replace(array_keys($replacements), $replacements, $query);
-
-      if (is_array($args)) {
-        foreach ($args as $id => $arg) {
-          $args[$id] = str_replace(array_keys($replacements), $replacements, $arg);
-        }
-      }
-
-      // The $query is final and ready to go, we are going to redirect it to
-      // become an insert into our table, sneaky!
-      // Our query will look like:
-      // CREATE TABLE {idx} SELECT @row := @row + 1 AS weight_alias, cl.* FROM
-      // (-query-) AS cl, (SELECT @row := 0) AS r
-      // We do some magic to get the row count.
-
-      $this->batched_execution_state->sandbox['weight_field_alias'] = $this->_weight_alias_create($this->view);
-      // Views can construct queries that have fields with aliases longer than
-      // 64 characters, which will cause problems when creating the table to
-      // insert them into. So we hash the aliases down to make sure they are
-      // unique.
-      $this->batched_execution_state->sandbox['field_aliases'] = $this->field_aliases_create($this->view);
-      $select_aliases = array();
-      foreach ($this->batched_execution_state->sandbox['field_aliases'] as $hash => $alias) {
-        $select_aliases[] = "cl.$alias AS $hash";
-      }
-
-      $insert_query = 'CREATE TABLE {' . $this->index_tablename() . '} SELECT @row := @row + 1 AS ' . $this->batched_execution_state->sandbox['weight_field_alias'] . ', ' . implode(', ', $select_aliases) . ' FROM (' . $query . ') AS cl, (SELECT @row := 0) AS r';
-
-      // Allow for a view to query an external database.
-      if (isset($view->base_database)) {
-        db_set_active($view->base_database);
-        $external = TRUE;
-      }
-
-      db_query($insert_query, $args);
-
-      // Now create an index for the weight field, otherwise the queries on the
-      // index will take a long time to execute.
-      $ret = array();
-      db_add_unique_key($ret, $this->index_tablename(), $this->batched_execution_state->sandbox['weight_field_alias'], array($this->batched_execution_state->sandbox['weight_field_alias']));
-
-      if (!empty($external)) {
-        db_set_active();
-      }
-
-    }
-
+    $view->execute();
   }
 
   /**
@@ -766,5 +708,97 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
       // Set the message in the batch context.
       return t('Time remaining: about @interval.', array('@interval' => format_interval($stamp)));
     }
+  }
+}
+
+class views_data_export_plugin_query_default_batched extends views_plugin_query_default {
+
+
+  /**
+   * Executes the query and fills the associated view object with according
+   * values.
+   *
+   * Values to set: $view->result, $view->total_rows, $view->execute_time,
+   * $view->current_page.
+   */
+  function execute(&$view) {
+    $display_handler = &$view->display_handler;
+
+    $external = FALSE; // Whether this query will run against an external database.
+    $query = $view->build_info['query'];
+    $count_query = $view->build_info['count_query'];
+    if (empty($this->options['disable_sql_rewrite'])) {
+      $query = db_rewrite_sql($view->build_info['query'], $view->base_table, $view->base_field, array('view' => &$view));
+      $count_query = db_rewrite_sql($view->build_info['count_query'], $view->base_table, $view->base_field, array('view' => &$view));
+    }
+    $args = $view->build_info['query_args'];
+
+    vpr($query);
+
+    $items = array();
+    if ($query) {
+      $replacements = module_invoke_all('views_query_substitutions', $view);
+      $query = str_replace(array_keys($replacements), $replacements, $query);
+      $count_query = 'SELECT COUNT(*) FROM (' . str_replace(array_keys($replacements), $replacements, $count_query) . ') count_alias';
+
+      if (is_array($args)) {
+        foreach ($args as $id => $arg) {
+          $args[$id] = str_replace(array_keys($replacements), $replacements, $arg);
+        }
+      }
+
+      // Detect an external database.
+      if (isset($view->base_database)) {
+        db_set_active($view->base_database);
+        $external = TRUE;
+      }
+
+      $start = views_microtime();
+
+      if ($this->pager->use_count_query() || !empty($view->get_total_rows)) {
+        $this->pager->execute_count_query($count_query, $args);
+      }
+
+      // Let the pager modify the query to add limits.
+      $this->pager->pre_execute($query, $args);
+
+      // The $query is final and ready to go, we are going to redirect it to
+      // become an insert into our table, sneaky!
+      // Our query will look like:
+      // CREATE TABLE {idx} SELECT @row := @row + 1 AS weight_alias, cl.* FROM
+      // (-query-) AS cl, (SELECT @row := 0) AS r
+      // We do some magic to get the row count.
+
+      $display_handler->batched_execution_state->sandbox['weight_field_alias'] = $display_handler->_weight_alias_create($view);
+      // Views can construct queries that have fields with aliases longer than
+      // 64 characters, which will cause problems when creating the table to
+      // insert them into. So we hash the aliases down to make sure they are
+      // unique.
+      $display_handler->batched_execution_state->sandbox['field_aliases'] = $display_handler->field_aliases_create($view);
+      $select_aliases = array();
+      foreach ($display_handler->batched_execution_state->sandbox['field_aliases'] as $hash => $alias) {
+        $select_aliases[] = "cl.$alias AS $hash";
+      }
+
+      $insert_query = 'CREATE TABLE {' . $display_handler->index_tablename() . '} SELECT @row := @row + 1 AS ' . $display_handler->batched_execution_state->sandbox['weight_field_alias'] . ', ' . implode(', ', $select_aliases) . ' FROM (' . $query . ') AS cl, (SELECT @row := 0) AS r';
+
+      db_query($insert_query, $args);
+
+      // Now create an index for the weight field, otherwise the queries on the
+      // index will take a long time to execute.
+      $ret = array();
+      db_add_unique_key($ret, $display_handler->index_tablename(), $display_handler->batched_execution_state->sandbox['weight_field_alias'], array($display_handler->batched_execution_state->sandbox['weight_field_alias']));
+
+      $this->pager->post_execute($view->result);
+
+      if ($this->pager->use_pager()) {
+        $view->total_rows = $this->pager->get_total_items();
+      }
+
+      if ($external) {
+        db_set_active();
+      }
+    }
+    $view->execute_time = views_microtime() - $start;
   }
 }
