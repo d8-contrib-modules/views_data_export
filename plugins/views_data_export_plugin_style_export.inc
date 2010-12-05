@@ -67,7 +67,71 @@ class views_data_export_plugin_style_export extends views_plugin_style {
       '#type' => 'textfield',
       '#title' => t('Filename'),
       '#default_value' => $this->options['filename'],
-      '#description' => t('The filename that will be suggested to the browser for downloading purposes. %view will be replaced with the view name.'),
+      '#description' => t('The filename that will be suggested to the browser for downloading purposes. You may include replacement patterns from the list below.'),
+      '#process' => array('views_process_dependency'),
+      '#dependency' => array(
+        'edit-style-options-provide-file' => array(TRUE),
+      ),
+    );
+
+    // General token replacement.
+    $output = t('<p>The following substitution patterns are available for this display. Use the pattern shown on the left to display the value indicated on the right.</p>');
+    $items = array(
+      '%view == ' . t('view name'),
+    );
+
+    $output .= theme('item_list', $items);
+
+    // Get a list of the available arguments for token replacement.
+    $options = array();
+
+    $count = 0; // This lets us prepare the key as we want it printed.
+    foreach ($this->view->display_handler->get_handlers('argument') as $arg => $handler) {
+      $options[t('Arguments')]['%' . ++$count . '-title'] = t('@argument title', array('@argument' => $handler->ui_name()));
+      $options[t('Arguments')]['%' . $count . '-value'] = t('@argument value', array('@argument' => $handler->ui_name()));
+    }
+
+    // Append the list with exposed filters stuff.
+    $options[t('Exposed filters')]['%exposed'] = t('effective exposed filters, like <em>filter1_foo-filter2_bar</em>');
+
+    // ...and datestamp.
+    $time = time();
+    $parts = array(
+      'full' => 'Y-m-d\TH-i-s',
+      'yy' => 'y',
+      'yyyy' => 'Y',
+      'mm' => 'm',
+      'mmm' => 'M',
+      'dd' => 'd',
+      'ddd' => 'D',
+      'hh' => 'H',
+      'mm' => 'i',
+      'ss' => 's',
+    );
+    foreach ($parts as $part => $format) {
+      $options[t('Timestamp')]['%timestamp-' . $part] = format_date($time, 'custom', $format);
+    }
+
+    // We have some options, so make a list.
+    if (!empty($options)) {
+      foreach (array_keys($options) as $type) {
+        if (!empty($options[$type])) {
+          $items = array();
+          foreach ($options[$type] as $key => $value) {
+            $items[] = $key . ' == ' . $value;
+          }
+          $output .= theme('item_list', $items, $type);
+        }
+      }
+    }
+    // This construct uses 'hidden' and not markup because process doesn't
+    // run. It also has an extra div because the dependency wants to hide
+    // the parent in situations like this, so we need a second div to
+    // make this work.
+    $form['help'] = array(
+      '#type' => 'hidden',
+      '#id' => 'views-tokens-help',
+      '#prefix' => '<div><fieldset id="views-tokens-help"><legend>' . t('Replacement patterns') . '</legend>' . $output . '</fieldset></div>',
       '#process' => array('views_process_dependency'),
       '#dependency' => array(
         'edit-style-options-provide-file' => array(TRUE),
@@ -224,6 +288,7 @@ class views_data_export_plugin_style_export extends views_plugin_style {
    * Add any HTTP headers that this style plugin wants to.
    */
   function add_http_headers() {
+    $view = &$this->view;
 
     drupal_set_header('Cache-Control: max-age=60, must-revalidate');
 
@@ -234,10 +299,52 @@ class views_data_export_plugin_style_export extends views_plugin_style {
     }
 
     if (isset($this->options['filename']) && !empty($this->options['provide_file'])) {
-      $filename = strtr(
-        $this->options['filename'],
-        array('%view' => check_plain($this->view->name))
+      // General tokens.
+      $tokens = array(
+        '%view' => check_plain($view->name),
       );
+      // Argument tokens.
+      $count = 0;
+      foreach ($view->display_handler->get_handlers('argument') as $arg => $handler) {
+        $token = '%' . ++$count;
+        $tokens[$token . '-title'] = check_plain($handler->title());
+        $tokens[$token . '-value'] = isset($view->args[$count - 1]) ? check_plain($view->args[$count - 1]) : '';
+      }
+
+      // Effective exposed filters token.
+      $exposed = array();
+      foreach ($view->display_handler->get_handlers('filter') as $arg => $handler) {
+        if (!$handler->options['exposed']) {
+          continue;
+        }
+        if (!empty($view->exposed_input[$handler->options['expose']['identifier']])) {
+          $exposed[] = check_plain($handler->options['expose']['identifier']) . '_' . check_plain($view->exposed_input[$handler->options['expose']['identifier']]);
+        }
+      }
+      if (!empty($exposed)) {
+        $tokens['%exposed'] = implode('-', $exposed);
+      }
+
+      // Timestamp token.
+      $time = time();
+      $parts = array(
+        'full' => 'Y-m-d\TH-i-s',
+        'yy' => 'y',
+        'yyyy' => 'Y',
+        'mm' => 'm',
+        'mmm' => 'M',
+        'dd' => 'd',
+        'ddd' => 'D',
+        'hh' => 'H',
+        'mm' => 'i',
+        'ss' => 's',
+      );
+      foreach ($parts as $part => $format) {
+        $tokens['%timestamp-' . $part] = format_date($time, 'custom', $format);
+      }
+
+      $filename = strtr($style->options['filename'], $tokens);
+
 
       if ($filename) {
         drupal_set_header('Content-Disposition: attachment; filename="'. $filename .'"');
