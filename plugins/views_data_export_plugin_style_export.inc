@@ -343,7 +343,7 @@ class views_data_export_plugin_style_export extends views_plugin_style {
         $tokens['%timestamp-' . $part] = format_date($time, 'custom', $format);
       }
 
-      $filename = strtr($style->options['filename'], $tokens);
+      $filename = strtr($this->options['filename'], $tokens);
 
 
       if ($filename) {
