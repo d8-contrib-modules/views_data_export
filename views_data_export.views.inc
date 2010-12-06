@@ -91,7 +91,7 @@ function views_data_export_views_plugins() {
         'export feed type' => 'txt',
         'export feed text' => 'Plain Text Document',
         'export feed file' => '%view.txt',
-        'export feed icon' => drupal_get_path('module', 'views_data_export') . '/images/csv.txt',
+        'export feed icon' => drupal_get_path('module', 'views_data_export') . '/images/txt.png',
         'additional themes' => array(
           'views_data_export_txt_header' => 'style',
           'views_data_export_txt_body' => 'style',
