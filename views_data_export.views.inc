@@ -58,7 +58,7 @@ function views_data_export_views_plugins() {
         // Views Data Export element mostly used for creating some additional classes and template names.
         'export feed type' => 'csv',
         'export feed text' => 'CSV',
-        'export feed file' => 'view-%view.csv',
+        'export feed file' => '%view.csv',
         'export feed icon' => drupal_get_path('module', 'views_data_export') . '/images/csv.png',
         'additional themes' => array(
           'views_data_export_csv_header' => 'style',
@@ -74,7 +74,7 @@ function views_data_export_views_plugins() {
         'export headers' => array('Content-Type: application/msword'),
         'export feed type' => 'doc',
         'export feed text' => 'Word Document',
-        'export feed file' => 'view-%view.doc',
+        'export feed file' => '%view.doc',
         'export feed icon' => drupal_get_path('module', 'views_data_export') . '/images/doc.png',
         'additional themes' => array(
           'views_data_export_doc_header' => 'style',
@@ -90,7 +90,7 @@ function views_data_export_views_plugins() {
         'export headers' => array('Content-Type: text/plain'),
         'export feed type' => 'txt',
         'export feed text' => 'Plain Text Document',
-        'export feed file' => 'view-%view.txt',
+        'export feed file' => '%view.txt',
         'export feed icon' => drupal_get_path('module', 'views_data_export') . '/images/csv.txt',
         'additional themes' => array(
           'views_data_export_txt_header' => 'style',
@@ -106,7 +106,7 @@ function views_data_export_views_plugins() {
         'export headers' => array('Content-Type: application/vnd.ms-excel'),
         'export feed type' => 'xls',
         'export feed text' => 'XLS',
-        'export feed file' => 'view-%view.xls',
+        'export feed file' => '%view.xls',
         'export feed icon' => drupal_get_path('module', 'views_data_export') . '/images/xls.png',
         'additional themes' => array(
           'views_data_export_xls_header' => 'style',
@@ -122,7 +122,7 @@ function views_data_export_views_plugins() {
         'export headers' => array('Content-Type: text/xml'),
         'export feed type' => 'xml',
         'export feed text' => 'XML',
-        'export feed file' => 'view-%view.xml',
+        'export feed file' => '%view.xml',
         'export feed icon' => drupal_get_path('module', 'views_data_export') . '/images/xml.png',
         'additional themes' => array(
           'views_data_export_xml_header' => 'style',
