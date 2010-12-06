@@ -711,6 +711,8 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
   }
 }
 
+// TODO: factor this into our own query plugin.
+views_get_plugin('query', 'views_query');
 class views_data_export_plugin_query_default_batched extends views_plugin_query_default {
 
 
