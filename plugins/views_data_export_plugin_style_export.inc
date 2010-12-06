@@ -105,7 +105,7 @@ class views_data_export_plugin_style_export extends views_plugin_style {
       $query['attach'] = $display_id;
     }
     $this->view->feed_icon .= theme($theme_pattern, array(
-        'image_path' => $this->defintion['export feed icon'],
+        'image_path' => $this->definition['export feed icon'],
         'url' => $this->view->get_url(NULL, $path),
         'query' => $query,
         'text' => $this->options['attach_text'],
