@@ -51,7 +51,6 @@ function views_data_export_schema() {
       ),
       'sandbox' => array(
         'type' => 'text',
-        'default' => '',
         'not null' => TRUE,
         'serialize' => TRUE,
       ),
