@@ -131,7 +131,6 @@ function _views_data_export_batch_process($export_id, $display_id, &$context) {
 
   // Inform the data_export display which export it corresponds to and execute
   $view->display_handler->batched_execution_state->eid = $export_id;
-  $view->display_handler->views_data_export_cached_view_loaded = TRUE;
   $view->execute_display($display_id);
 
   // Update batch api progress information
