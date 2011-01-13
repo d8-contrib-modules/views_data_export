@@ -180,20 +180,6 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
       $output = $this->execute_initial();
     }
 
-    // Call me on the cached version of this view please
-    // This allows this view to be programatically executed with nothing
-    // more than the eid in $_GET in order for it to execute the next chunk
-    // TODO: What is going on here?
-    if (!$this->views_data_export_cached_view_loaded) {
-      $view = views_data_export_view_retrieve($this->batched_execution_state->eid);
-      $view->set_display($this->view->current_display);
-      $view->display_handler->batched_execution_state->eid = $this->batched_execution_state->eid;
-      $view->display_handler->views_data_export_cached_view_loaded = TRUE;
-      $ret =  $view->execute_display($display_id);
-      $this->batched_execution_state = &$view->display_handler->batched_execution_state;
-      return $ret;
-    }
-
     // Last time through
     if ($this->batched_execution_state->batch_state == VIEWS_DATA_EXPORT_FINISHED) {
       $output = $this->execute_final();
