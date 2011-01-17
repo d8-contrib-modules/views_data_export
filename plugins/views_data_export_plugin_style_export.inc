@@ -225,20 +225,20 @@ class views_data_export_plugin_style_export extends views_plugin_style {
     $rows['header'] = $this->render_header();
     $rows['body'] = $this->render_body();
     $rows['footer'] = $this->render_footer();
-    $output .= theme($this->theme_functions(), $this->view, $this->options, $rows, $title);
+    $output .= theme($this->theme_functions(), $this->view, $this->options, $rows, $title = '');
     return $output;
   }
 
   function render_header() {
     $rows = array();
-    $output .= theme($this->definition['additional themes base'] . '_header', $this->view, $this->options, $rows, $title);
+    $output = theme($this->definition['additional themes base'] . '_header', $this->view, $this->options, $rows, $title = '');
 
     return $output;
   }
 
   function render_footer() {
     $rows = array();
-    $output .= theme($this->definition['additional themes base'] . '_footer', $this->view, $this->options, $rows, $title);
+    $output = theme($this->definition['additional themes base'] . '_footer', $this->view, $this->options, $rows, $title = '');
 
     return $output;
   }

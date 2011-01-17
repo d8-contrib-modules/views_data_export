@@ -284,7 +284,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
 
       case VIEWS_DATA_EXPORT_BODY:
         // Remove rendered results from our index
-        if (count($this->view->result) && ($sandbox['weight_field_alias'])) {
+        if (count($this->view->result) && !empty($sandbox['weight_field_alias'])) {
           $last = end($this->view->result);
           db_query('DELETE FROM {' . $this->index_tablename() . '} WHERE ' . $sandbox['weight_field_alias'] . '  <= %d', $last->{$sandbox['weight_field_alias']});
 
@@ -324,7 +324,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
    */
   function execute_final() {
     // Should we download the file.
-    if ($_GET['download']) {
+    if (!empty($_GET['download'])) {
       // This next method will exit.
       $this->transfer_file();
     }
@@ -428,7 +428,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
   function render_complete() {
     $return_path = empty($_GET['return-url']) ? '' : $_GET['return-url'];
 
-    return theme('views_data_export_complete_page', url($this->get_option('path'), array('query' => 'download=1&eid=' . $this->batched_execution_state->eid)), $this->errors, $return_path);
+    return theme('views_data_export_complete_page', url($this->get_option('path'), array('query' => 'download=1&eid=' . $this->batched_execution_state->eid)), $this->errors = array(), $return_path);
   }
 
   /**
@@ -555,7 +555,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
       // Return the filename associated with this file.
       $this->_output_file = $this->file_load($this->batched_execution_state->fid);
     }
-    return $this->_output_file->filepath;
+    return !empty($this->_output_file) ? $this->_output_file->filepath : NULL;
   }
 
   /**

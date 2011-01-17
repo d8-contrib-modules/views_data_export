@@ -93,7 +93,7 @@ function template_preprocess_views_data_export_csv_header(&$vars) {
   // Format header values.
   foreach ($vars['header'] as $key => $value) {
     $output = decode_entities(strip_tags($value));
-    if ($vars['options']['trim']) {
+    if (!empty($vars['options']['trim'])) {
       $output = trim($output);
     }
     $vars['header'][$key] = $wrap . str_replace('"', $replace_value, $output) . $wrap;
@@ -125,7 +125,7 @@ function template_preprocess_views_data_export_csv_body(&$vars) {
   foreach ($vars['themed_rows'] as $i => $values) {
     foreach ($values as $j => $value) {
       $output = decode_entities(strip_tags($value));
-      if ($vars['options']['trim']) {
+      if (!empty($vars['options']['trim'])) {
         $output = trim($output);
       }
       $vars['themed_rows'][$i][$j] = $wrap . str_replace('"', $replace_value, $output) . $wrap;
