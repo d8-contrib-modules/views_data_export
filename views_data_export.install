@@ -57,7 +57,7 @@ function views_data_export_schema() {
     ),
     'primary key' => array('eid'),
   );
-  
+
   $schema['views_data_export_object_cache'] = array(
     'description' => 'A modified version of the views_object_cache that ignores session id.',
     'fields' => array(
@@ -74,7 +74,8 @@ function views_data_export_schema() {
         'description' => 'The time this cache was created or updated.',
       ),
       'data' => array(
-        'type' => 'blob', // Updated to 'text' (with size => 'big') in views_schema_6004()
+        'type' => 'text',
+        'size' => 'big',
         'description' => 'Serialized data being stored.',
         'serialize' => TRUE,
       ),
@@ -100,10 +101,31 @@ function views_data_export_install() {
  * Implementation of hook_uninstall()
  */
 function views_data_export_uninstall() {
-  
+
   //Clean up any tables we may have left around
   views_data_export_garbage_collect(0, -1);
-  
+
   //Remove our base table
   drupal_uninstall_schema('views_data_export');
+}
+
+/**
+ * Convert the data column in the object cache.
+ */
+function views_data_export_update_6200() {
+  $ret = array();
+  
+  $new_field = array(
+    'type' => 'text',
+    'size' => 'big',
+    'description' => 'Serialized data being stored.',
+    'serialize' => TRUE,
+  );
+
+  // Drop and re-add this field because there is a bug in
+  // db_change_field that causes this to fail when trying to cast the data.
+  db_drop_field($ret, 'views_data_export_object_cache', 'data');
+  db_add_field($ret, 'views_data_export_object_cache', 'data', $new_field);
+
+  return $ret;
 }
