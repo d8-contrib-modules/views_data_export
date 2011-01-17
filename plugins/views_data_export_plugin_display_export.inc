@@ -110,7 +110,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
             FALSE => t('Export data all in one segment. Possible time and memory limit issues.'),
           ),
         );
-        if ($this->is_compatible()) {
+        if (!$this->is_compatible()) {
           $form['use_batch']['#disabled'] = TRUE;
           $form['use_batch']['#default_value'] = 0;
           $form['use_batch']['message'] = array (
