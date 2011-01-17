@@ -48,6 +48,15 @@ function views_data_export_theme() {
     ),
     'file' => 'theme/views_data_export.theme.inc',
   );
+  
+  $hooks['views_data_export_message'] = array (
+    'variables' => array(
+      'message' => '',
+      'type' => 'info',
+    ),
+    'file' => 'theme/views_data_export.theme.inc',
+  );
+  
   return $hooks;
 }
 
