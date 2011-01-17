@@ -58,7 +58,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
    */
   function option_definition() {
     $options = parent::option_definition();
-    $options['use_batch'] = array('default' => TRUE);
+    $options['use_batch'] = array('default' => $this->is_compatible());
     $options['items_per_page'] = array('default' => '0');
     $options['style_plugin']['default'] = 'views_data_export_csv';
 
@@ -85,6 +85,10 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
       'title' => t('Batched export'),
       'value' => $this->get_option('use_batch') ? t('Yes') : t('No'),
     );
+    
+    if (!$this->is_compatible() && $this->get_option('use_batch')) {
+      $options['use_batch']['value'] .= ' <strong>' . t('(Warning: incompatible)') . '</strong>';
+    }
   }
 
   /**
@@ -106,6 +110,15 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
             FALSE => t('Export data all in one segment. Possible time and memory limit issues.'),
           ),
         );
+        if (!$this->is_compatible()) {
+          $form['use_batch']['#disabled'] = TRUE;
+          $form['use_batch']['#default_value'] = 0;
+          $form['use_batch']['message'] = array (
+            '#type' => 'markup',
+            '#value' => theme('views_data_export_message', t('The underlying database (!db_driver) is incompatible with the batched export option and it has been disabled.', array('!db_driver' => $this->_get_database_driver()))),
+            '#weight' => -10,
+          );
+        }
         break;
     }
   }
@@ -752,5 +765,33 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
       // Set the message in the batch context.
       return t('Time remaining: about @interval.', array('@interval' => format_interval($stamp)));
     }
+  }
+  
+  /**
+   * Checks the driver of the database underlying
+   * this query and returns FALSE if it is imcompatible
+   * with the approach taken in this display.
+   * Basically mysql & mysqli will be fine, pg will not
+   */
+  function is_compatible() {
+    $incompatible_drivers = array (
+      'pgsql',
+    );
+    $db_driver = $this->_get_database_driver();
+    return !in_array($db_driver, $incompatible_drivers);
+  }
+  
+  function  _get_database_driver() {
+    $name = !empty($this->view->base_database) ? $this->view->base_database : 'default';
+    // Lifted out of the middle of db_set_active()
+    global $db_url, $db_type, $active_db;
+    if (is_array($db_url)) {
+      $connect_url = array_key_exists($name, $db_url) ? $db_url[$name] : $db_url['default'];
+    }
+    else {
+      $connect_url = $db_url;
+    }
+    $db_type = substr($connect_url, 0, strpos($connect_url, '://'));
+    return $db_type;
   }
 }

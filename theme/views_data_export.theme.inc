@@ -8,6 +8,18 @@
  * Views bug: http://drupal.org/node/593336
  */
 
+
+/**
+ * Theme a status message
+ */
+function theme_views_data_export_message($message, $type = 'info') {
+  $output = '';
+  $output .= '<div class="messages status ' . $type . '">';
+  $output .= $message;
+  $output .= '</div>';
+  return $output;
+}
+
 /**
  * Theme a feed link.
  *
