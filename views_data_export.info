@@ -1,4 +1,3 @@
-; $Id$
 name = Views Data Export
 description = "Plugin to export views data into various file formats"
 
