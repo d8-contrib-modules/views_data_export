@@ -213,6 +213,8 @@ function template_preprocess_views_data_export_xls_body(&$vars) {
 function template_preprocess_views_data_export_msoffice_body(&$vars) {
   _views_data_export_header_shared_preprocess($vars);
   _views_data_export_body_shared_preprocess($vars);
+  
+  $output = '';
 
   // Construct the tbody of a table, see theme_table().
 
@@ -254,7 +256,7 @@ function template_preprocess_views_data_export_msoffice_body(&$vars) {
       $output .= ' <tr' . drupal_attributes($attributes) . '>';
       $i = 0;
       foreach ($cells as $cell) {
-        $cell = tablesort_cell($cell, $header, $ts, $i++);
+        $cell = tablesort_cell($cell, $vars['header'], $ts, $i++);
         $output .= _theme_table_cell($cell);
       }
       $output .= " </tr>\n";
@@ -286,7 +288,7 @@ function template_preprocess_views_data_export_msoffice_header(&$vars) {
   $ts = tablesort_init($vars['header']);
 
   foreach ($vars['header'] as $cell) {
-    $cell = tablesort_header($cell, $header, $ts);
+    $cell = tablesort_header($cell, $vars['header'], $ts);
     $vars['header_row'] .= _theme_table_cell($cell, TRUE);
   }
 
