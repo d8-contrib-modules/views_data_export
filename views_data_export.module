@@ -13,6 +13,15 @@ define('VIEWS_DATA_EXPORT_FINISHED', 'finished');
 define('VIEWS_DATA_EXPORT_INDEX_TABLE_PREFIX', 'views_data_export_index_');
 
 /**
+ * Implements hook_init().
+ */
+function views_data_export_init() {
+  // We have to include our theme preprocessors here until:
+  // http://drupal.org/node/1096770 is fixed.
+  module_load_include('inc', 'views_data_export', 'theme/views_data_export.theme');
+}
+
+/**
  * Implementation of hook_views_api().
  */
 function views_data_export_views_api() {
@@ -47,7 +56,7 @@ function views_data_export_theme() {
     ),
     'file' => 'theme/views_data_export.theme.inc',
   );
-  
+
   $hooks['views_data_export_message'] = array (
     'arguments' => array(
       'message' => '',
@@ -55,7 +64,7 @@ function views_data_export_theme() {
     ),
     'file' => 'theme/views_data_export.theme.inc',
   );
-  
+
   return $hooks;
 }
 
