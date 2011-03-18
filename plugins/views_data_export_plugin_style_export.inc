@@ -230,14 +230,14 @@ class views_data_export_plugin_style_export extends views_plugin_style {
 
   function render_header() {
     $rows = array();
-    $output .= theme($this->definition['additional themes base'] . '_header', $this->view, $this->options, $rows, $title);
 
+    $output = theme($this->theme_functions($this->definition['additional themes base'] . '_header'), $this->view, $this->options, $rows, '');
     return $output;
   }
 
   function render_footer() {
     $rows = array();
-    $output .= theme($this->definition['additional themes base'] . '_footer', $this->view, $this->options, $rows, $title);
+    $output = theme($this->theme_functions($this->definition['additional themes base'] . '_footer'), $this->view, $this->options, $rows, '');
 
     return $output;
   }
@@ -266,7 +266,7 @@ class views_data_export_plugin_style_export extends views_plugin_style {
         $rows = $records;
       }
 
-      $output .= theme($this->definition['additional themes base'] . '_body', $this->view, $this->options, $rows, $title);
+      $output .= theme($this->theme_functions($this->definition['additional themes base'] . '_body'), $this->view, $this->options, $rows, '');
     }
     unset($this->view->row_index);
     return $output;
