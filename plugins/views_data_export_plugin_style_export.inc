@@ -234,8 +234,7 @@ class views_data_export_plugin_style_export extends views_plugin_style {
     $rows = array();
     $title = '';
     $output = '';
-    $output .= theme($this->definition['additional themes base'] . '_header', array('view' => $this->view, 'options' => $this->options, 'rows' => $rows, 'title' => $title));
-
+    $output .= theme($this->theme_functions($this->definition['additional themes base'] . '_header'), array('view' => $this->view, 'options' => $this->options, 'rows' => $rows, 'title' => $title));
     return $output;
   }
 
@@ -243,7 +242,7 @@ class views_data_export_plugin_style_export extends views_plugin_style {
     $rows = array();
     $title = '';
     $output = '';
-    $output .= theme($this->definition['additional themes base'] . '_footer', array('view' => $this->view, 'options' => $this->options, 'rows' => $rows, 'title' => $title));
+    $output .= theme($this->theme_functions($this->definition['additional themes base'] . '_footer'), array('view' => $this->view, 'options' => $this->options, 'rows' => $rows, 'title' => $title));
 
     return $output;
   }
@@ -273,7 +272,7 @@ class views_data_export_plugin_style_export extends views_plugin_style {
       }
 
       $title = '';
-      $output .= theme($this->definition['additional themes base'] . '_body', array('view' => $this->view, 'options' => $this->options, 'rows' => $rows, 'title' => $title));
+      $output .= theme($this->theme_functions($this->definition['additional themes base'] . '_body'), array('view' => $this->view, 'options' => $this->options, 'rows' => $rows, 'title' => $title));
     }
     unset($this->view->row_index);
     return $output;
