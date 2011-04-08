@@ -217,12 +217,12 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
 
     // Register this export with our central table - get a unique eid
     // Also store our view in a cache to be retrieved with each batch call
-    $this->batched_execution_state = views_data_export_new($this->view->name, $this->view->current_display, $this->outputfile_path());
+    $this->batched_execution_state = views_data_export_new($this->view->name, $this->view->current_display, $this->outputfile_create());
     views_data_export_view_store($this->batched_execution_state->eid, $this->view);
 
     // We need to build the index right now, before we lose $_GET etc.
     $this->initialize_index();
-    $this->batched_execution_state->fid = $this->outputfile_create();
+    //$this->batched_execution_state->fid = $this->outputfile_create();
 
     // Initialize the progress counter
     $this->batched_execution_state->sandbox['max'] = db_result(db_query('SELECT COUNT(*) FROM {' . $this->index_tablename() . '}'));
