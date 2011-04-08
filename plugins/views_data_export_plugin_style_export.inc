@@ -104,7 +104,7 @@ class views_data_export_plugin_style_export extends views_plugin_style {
       'dd' => 'd',
       'ddd' => 'D',
       'hh' => 'H',
-      'mm' => 'i',
+      'ii' => 'i',
       'ss' => 's',
     );
     foreach ($parts as $part => $format) {
@@ -335,7 +335,7 @@ class views_data_export_plugin_style_export extends views_plugin_style {
         'dd' => 'd',
         'ddd' => 'D',
         'hh' => 'H',
-        'mm' => 'i',
+        'ii' => 'i',
         'ss' => 's',
       );
       foreach ($parts as $part => $format) {
