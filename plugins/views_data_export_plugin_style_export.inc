@@ -76,7 +76,8 @@ class views_data_export_plugin_style_export extends views_plugin_style {
     // General token replacement.
     $output = t('<p>The following substitution patterns are available for this display. Use the pattern shown on the left to display the value indicated on the right.</p>');
     $items = array(
-      '%view == ' . t('view name'),
+      '%view == ' . t('View name'),
+      '%display == ' . t('Display name'),
     );
 
     $output .= theme('item_list', array('items' => $items));
@@ -307,6 +308,7 @@ class views_data_export_plugin_style_export extends views_plugin_style {
       // General tokens.
       $tokens = array(
         '%view' => check_plain($view->name),
+        '%display' => check_plain($view->current_display),
       );
       // Argument tokens.
       $count = 0;
