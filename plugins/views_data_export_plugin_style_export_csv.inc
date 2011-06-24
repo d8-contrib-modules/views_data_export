@@ -32,6 +32,11 @@ class views_data_export_plugin_style_export_csv extends views_data_export_plugin
       'default' => TRUE,
       'translatable' => FALSE,
     );
+    $options['encoding'] = array(
+      'default' => '',
+      'translatable' => FALSE,
+    );
+
 
     return $options;
   }
@@ -69,6 +74,16 @@ class views_data_export_plugin_style_export_csv extends views_data_export_plugin
       '#type' => 'checkbox',
       '#title' => t('Make first row a list of column headers.'),
       '#default_value' => !empty($this->options['header']),
+    );
+    $form['encoding'] = array(
+      '#type' => 'select',
+      '#default_value' => !empty($this->options['encoding']) ? $this->options['encoding'] : '',
+      '#title' => t('Character encoding conversion'),
+      '#options' => array (
+        '' => t('No conversion'),
+        'ASCII' => t('ASCII'),
+      ),
+      '#description' => t('Optionally specify a character conversion that some CSV file readers need. Note, using an external tool is always preferred and you should only use this option as a last resort. This feature requires the "iconv" PHP extension.'),
     );
   }
 }
