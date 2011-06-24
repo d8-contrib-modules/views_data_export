@@ -503,6 +503,10 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
   function transfer_file() {
     // Build the view so we can set the headers.
     $this->view->build();
+    // Arguments can cause the style to not get built.
+    if (!$this->view->init_style()) {
+      $this->view->build_info['fail'] = TRUE;
+    }
     // Set the headers.
     $this->add_http_headers();
     file_transfer($this->outputfile_path(), array());
