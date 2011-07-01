@@ -20,13 +20,25 @@ class views_data_export_plugin_style_export_csv extends views_data_export_plugin
   function option_definition() {
     $options = parent::option_definition();
 
+    $options['separator'] = array(
+      'default' => ',',
+      'translatable' => TRUE,
+    );
     $options['quote'] = array(
       'default' => TRUE,
       'translatable' => TRUE,
     );
-    $options['separator'] = array(
-      'default' => ',',
-      'translatable' => TRUE,
+    $options['trim'] = array(
+      'default' => FALSE,
+      'translatable' => FALSE,
+    );
+    $options['replace_newlines'] = array(
+      'default' => FALSE,
+      'translatable' => FALSE,
+    );
+    $options['newline_replacement'] = array(
+      'default' => ', ',
+      'translatable' => FALSE,
     );
     $options['header'] = array(
       'default' => TRUE,
@@ -69,6 +81,20 @@ class views_data_export_plugin_style_export_csv extends views_data_export_plugin
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['trim']),
       '#title' => t('Trim whitespace from rendered fields. Can be useful for some themes where output results in extra newlines.'),
+    );
+    $form['replace_newlines'] = array(
+      '#type' => 'checkbox',
+      '#default_value' => !empty($this->options['replace_newlines']),
+      '#title' => t('Replace newlines in rendered fields.'),
+    );
+    $form['newline_replacement'] = array(
+      '#prefix' => '<div><div id="edit-options-newline-replacement">',
+      '#suffix' => '</div></div>',
+      '#type' => 'textfield',
+      '#title' => t('Replacement'),
+      '#default_value' => $this->options['newline_replacement'],
+      '#process' => array('form_process_checkboxes', 'ctools_dependent_process'),
+      '#dependency' => array('edit-style-options-replace-newlines' => array(TRUE)),
     );
     $form['header'] = array(
       '#type' => 'checkbox',
