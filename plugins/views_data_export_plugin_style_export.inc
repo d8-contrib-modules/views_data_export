@@ -124,17 +124,14 @@ class views_data_export_plugin_style_export extends views_plugin_style {
         }
       }
     }
-    // This construct uses 'hidden' and not markup because process doesn't
-    // run. It also has an extra div because the dependency wants to hide
-    // the parent in situations like this, so we need a second div to
-    // make this work.
     $form['help'] = array(
-      '#type' => 'hidden',
-      '#id' => 'views-tokens-help',
-      '#prefix' => '<div><fieldset id="views-tokens-help"><legend>' . t('Replacement patterns') . '</legend>' . $output . '</fieldset></div>',
-      '#process' => array('ctools_dependent_process'),
+      '#type' => 'fieldset',
+      '#title' => t('Replacement patterns'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#value' => $output,
       '#dependency' => array(
-        'edit-style-options-provide-file' => array(TRUE),
+        'edit-style-options-provide-file' => array(1),
       ),
     );
     $form['parent_sort'] = array(
