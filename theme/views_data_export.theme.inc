@@ -161,6 +161,9 @@ function template_preprocess_views_data_export_csv_body(&$vars) {
             break;
         }
       }
+      if (!empty($vars['options']['replace_newlines'])) {
+        $output = str_replace("\n", $vars['options']['newline_replacement'], $output);
+      }
       $vars['themed_rows'][$i][$j] = $wrap . str_replace('"', $replace_value, $output) . $wrap;
     }
   }
