@@ -274,7 +274,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
     // We do not return, so update database sandbox now
     views_data_export_update($this->batched_execution_state);
 
-    $final_destination = $this->get_option('path');
+    $final_destination = $this->view->get_url();
 
     // Provide a way in for others at this point
     // e.g. Drush to grab this batch and yet execute it in
@@ -469,7 +469,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
     );
 
     return theme('views_data_export_complete_page', array(
-      'file' => url($this->get_option('path'), array('query' => $query)),
+      'file' => url($this->view->get_url(), array('query' => $query)),
       'errors' => $this->errors,
       'return_url' => $return_path));
   }
