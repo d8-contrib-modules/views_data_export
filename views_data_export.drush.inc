@@ -74,7 +74,7 @@ function drush_views_data_export_validate() {
   if (!$view->set_display($args[1])) {
     return drush_set_error('VIEW_DOES_NOT_EXIST', dt('The view !view does not have the !display display.', array ('!view' => $args[0], '!display' => $args[1])));
   }
-  
+
   $format = drush_get_option('format');
   $valid_formats = array('csv', 'doc', 'txt', 'xls', 'xml');
   if (!empty($format) && !in_array($format, $valid_formats)) {
@@ -97,7 +97,7 @@ function drush_views_data_export($view_name, $display_id, $output_file) {
   // and then execute that one instead
   if ($view->display[$display_id]->display_plugin != 'views_data_export') {
     //drush_log("Display '$display_id' is not views_data_export. Making one that is and executing that instead =).", 'success');
-    
+
     $format = drush_get_option('format');
     $settings = array();
     switch ($format) {
@@ -124,10 +124,10 @@ function drush_views_data_export($view_name, $display_id, $output_file) {
       }
       // Seperator
     }
-    
+
     $display_id = _drush_views_data_export_clone_display($view, $display_id, $settings);
   }
-  
+
   $view->set_display($display_id);
 
   // We execute the view normally, and take advantage
@@ -237,7 +237,7 @@ function _drush_views_data_export_batch_finished($eid, $output_file, &$context) 
  *   The new display_id
  */
 function _drush_views_data_export_clone_display(&$view, $display_id, $settings = array()) {
-  
+
   // Create the new display
   $new_display_id = _drush_views_data_export_generate_display_id($view, 'views_data_export');
   $view->display[$new_display_id] = clone $view->display[$display_id];
@@ -259,7 +259,7 @@ function _drush_views_data_export_clone_display(&$view, $display_id, $settings =
         'trim' => 1,
         'header' => 1,
       ),
-      'use_batch' => 1,
+      'use_batch' => 'batch',
       'path' => '',
       'displays' => array (
         'default' => 'default',
@@ -267,9 +267,9 @@ function _drush_views_data_export_clone_display(&$view, $display_id, $settings =
     ),
   );
   $settings = array_replace_recursive($default_settings, $settings);
-  
+
   $view->display[$new_display_id] = (object)array_replace_recursive((array)$view->display[$new_display_id], $settings);
-  
+
   return $new_display_id;
 }
 

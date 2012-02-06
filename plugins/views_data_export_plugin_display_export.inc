@@ -61,7 +61,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
    */
   function option_definition() {
     $options = parent::option_definition();
-    $options['use_batch'] = array('default' => $this->is_compatible());
+    $options['use_batch'] = array('default' => 'no_batch');
     $options['items_per_page'] = array('default' => '0');
     $options['style_plugin']['default'] = 'views_data_export_csv';
 
@@ -86,7 +86,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
     $options['use_batch'] = array(
       'category' => 'page',
       'title' => t('Batched export'),
-      'value' => ($this->get_option('use_batch') ? t('Yes') : t('No')),
+      'value' => ($this->get_option('use_batch') == 'batch' ? t('Yes') : t('No')),
     );
 
     if (!$this->is_compatible() && $this->get_option('use_batch')) {
@@ -109,13 +109,13 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
           '#description' => t(''),
           '#default_value' => $this->get_option('use_batch'),
           '#options' => array(
-            TRUE => t('Export data in small segments to build a complete export. Recommended for large exports sets (1000+ rows)'),
-            FALSE => t('Export data all in one segment. Possible time and memory limit issues.'),
+            'no_batch' => t('Export data all in one segment. Possible time and memory limit issues.'),
+            'batch' => t('Export data in small segments to build a complete export. Recommended for large exports sets (1000+ rows)'),
           ),
         );
         if (!$this->is_compatible()) {
           $form['use_batch']['#disabled'] = TRUE;
-          $form['use_batch']['#default_value'] = 0;
+          $form['use_batch']['#default_value'] = 'no_batch';
           $form['use_batch']['message'] = array (
             '#type' => 'markup',
             '#markup' => theme('views_data_export_message', array('message' => t('The underlying database (!db_driver) is incompatible with the batched export option and it has been disabled.', array('!db_driver' => $this->_get_database_driver())), 'type' => 'warning')),
@@ -144,7 +144,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
    */
   function is_batched() {
     // The source of this option may change in the future.
-    return $this->get_option('use_batch') && empty($this->view->live_preview);
+    return ($this->get_option('use_batch') == 'batch') && empty($this->view->live_preview);
   }
 
   /**
