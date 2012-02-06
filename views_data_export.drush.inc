@@ -284,7 +284,7 @@ function _drush_views_data_export_clone_display(&$view, $display_id, $settings =
         'trim' => 1,
         'header' => 1,
       ),
-      'use_batch' => 1,
+      'use_batch' => 'batch',
       'path' => '',
       'displays' => array (
         'default' => 'default',
