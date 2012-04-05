@@ -59,6 +59,14 @@ function views_data_export_drush_help($section) {
  * Implementation of drush_hook_COMMAND_validate().
  */
 function drush_views_data_export_validate() {
+  // Because of a bug in the way that Drush 4 computes the name of functions to
+  // call from a Drush command, we may end up getting called twice, so we just
+  // don't do anything on subsequent invocations.
+  static $already_run = FALSE;
+  if ($already_run) {
+    return;
+  }
+  $already_run = TRUE;
 
   $args = drush_get_arguments();
   array_shift($args);
@@ -73,6 +81,12 @@ function drush_views_data_export_validate() {
 
   if (!$view->set_display($args[1])) {
     return drush_set_error('VIEW_DOES_NOT_EXIST', dt('The view !view does not have the !display display.', array ('!view' => $args[0], '!display' => $args[1])));
+  }
+  else {
+    if ($view->current_display != $args[1]) {
+      drush_log(dt('Using different display from specified display: @display', array('@display' => $view->current_display)), 'notice');
+    }
+    drush_set_option('views_data_export_display_id', $view->current_display);
   }
 
   $format = drush_get_option('format');
@@ -97,6 +111,9 @@ function drush_views_data_export($view_name, $display_id, $output_file) {
     return;
   }
   $already_run = TRUE;
+  
+  // Set the display to the one that we computed earlier.
+  $display_id = drush_get_option('views_data_export_display_id', 'default');
 
   $view = views_get_view($view_name);
 
