@@ -89,6 +89,14 @@ function drush_views_data_export_validate() {
  * @see views_data_export_views_data_export_batch_alter().
  */
 function drush_views_data_export($view_name, $display_id, $output_file) {
+  // Because of a bug in the way that Drush 4 computes the name of functions to
+  // call from a Drush command, we may end up getting called twice, so we just
+  // don't do anything on subsequent invocations.
+  static $already_run = FALSE;
+  if ($already_run) {
+    return;
+  }
+  $already_run = TRUE;
 
   $view = views_get_view($view_name);
 
