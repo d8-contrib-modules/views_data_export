@@ -59,6 +59,14 @@ function views_data_export_drush_help($section) {
  * Implementation of drush_hook_COMMAND_validate().
  */
 function drush_views_data_export_validate() {
+  // Because of a bug in the way that Drush 4 computes the name of functions to
+  // call from a Drush command, we may end up getting called twice, so we just
+  // don't do anything on subsequent invocations.
+  static $already_run = FALSE;
+  if ($already_run) {
+    return;
+  }
+  $already_run = TRUE;
 
   $args = drush_get_arguments();
   array_shift($args);
@@ -95,6 +103,14 @@ function drush_views_data_export_validate() {
  * @see views_data_export_views_data_export_batch_alter().
  */
 function drush_views_data_export($view_name, $display_id, $output_file) {
+  // Because of a bug in the way that Drush 4 computes the name of functions to
+  // call from a Drush command, we may end up getting called twice, so we just
+  // don't do anything on subsequent invocations.
+  static $already_run = FALSE;
+  if ($already_run) {
+    return;
+  }
+  $already_run = TRUE;
 
   // Set the display to the one that we computed earlier.
   $display_id = drush_get_option('views_data_export_display_id', 'default');
@@ -106,7 +122,7 @@ function drush_views_data_export($view_name, $display_id, $output_file) {
   // and then execute that one instead
   if ($view->display[$display_id]->display_plugin != 'views_data_export') {
     //drush_log("Display '$display_id' is not views_data_export. Making one that is and executing that instead =).", 'success');
-    
+
     $format = drush_get_option('format');
     $settings = array();
     switch ($format) {
@@ -133,10 +149,10 @@ function drush_views_data_export($view_name, $display_id, $output_file) {
       }
       // Seperator
     }
-    
+
     $display_id = _drush_views_data_export_clone_display($view, $display_id, $settings);
   }
-  
+
   $view->set_display($display_id);
 
   // We execute the view normally, and take advantage
@@ -246,11 +262,11 @@ function _drush_views_data_export_batch_finished($eid, $output_file, &$context) 
  *   The new display_id
  */
 function _drush_views_data_export_clone_display(&$view, $display_id, $settings = array()) {
-  
+
   // Create the new display
   $new_display_id = _drush_views_data_export_generate_display_id($view, 'views_data_export');
   $view->display[$new_display_id] = drupal_clone($view->display[$display_id]);
-  
+
   // Ensure we have settings we'll need for our display
   $default_settings = array (
     'id' => $new_display_id,
@@ -276,9 +292,9 @@ function _drush_views_data_export_clone_display(&$view, $display_id, $settings =
     ),
   );
   $settings = array_replace_recursive($default_settings, $settings);
-  
+
   $view->display[$new_display_id] = (object)array_replace_recursive((array)$view->display[$new_display_id], $settings);
-  
+
   return $new_display_id;
 }
 
