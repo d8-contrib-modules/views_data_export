@@ -391,7 +391,9 @@ function template_preprocess_views_data_export_xml_body(&$vars) {
 
   foreach ($vars['header'] as $field => $header) {
     // If there is no field label, use 'no name'.
-    $vars['xml_tag'][$field] = !empty($header) ? $header : 'no name';
+    if (empty($header)) {
+      $header = 'no name';
+    }
     if ($vars['options']['transform']) {
       switch ($vars['options']['transform_type']) {
         case 'dash':
