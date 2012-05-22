@@ -669,6 +669,8 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
     if (fwrite($handle, $string) === FALSE) {
       $this->abort_export(t('Could not write to temporary output file for result export (@file). Check permissions.', array ('@file' => $output_file)));
     }
+    // Ensure that the temp file has the correct permissions.
+    chmod($output_file, 0660);
   }
 
   function abort_export($errors) {
