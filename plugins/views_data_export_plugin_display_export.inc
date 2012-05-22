@@ -675,7 +675,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
   *   An array containing the file information, or 0 in the event of an error.
   */
   function file_save_file($filepath) {
-    return file_save_data('', $filepath);
+    return file_save_data('', $filepath, FILE_EXISTS_REPLACE);
   }
 
   /**
