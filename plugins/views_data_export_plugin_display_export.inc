@@ -65,6 +65,9 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
     $options['items_per_page'] = array('default' => '0');
     $options['style_plugin']['default'] = 'views_data_export_csv';
 
+    // This is the default size of a segment when doing a batched export.
+    $options['segment_size']['default'] = 100;
+
     if (isset($options['defaults']['default']['items_per_page'])) {
       $options['defaults']['default']['items_per_page'] = FALSE;
     }
@@ -113,6 +116,18 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
             'batch' => t('Export data in small segments to build a complete export. Recommended for large exports sets (1000+ rows)'),
           ),
         );
+        // Allow the administrator to configure the number of items exported per batch.
+        $form['segment_size'] = array(
+          '#type' => 'select',
+          '#title' => t('Segment size'),
+          '#description' => t('If each row of your export consumes a lot of memory to render, then reduce this value. Higher values will generally mean that the export completes in less time but will have a higher peak memory usage.'),
+          '#options' => drupal_map_assoc(range(1, 500)),
+          '#default_value' => $this->get_option('segment_size'),
+          '#process' => array('ctools_dependent_process'),
+          '#dependency' => array(
+            'radio:use_batch' => array('batch')
+          ),
+        );
         if (!$this->is_compatible()) {
           $form['use_batch']['#disabled'] = TRUE;
           $form['use_batch']['#default_value'] = 'no_batch';
@@ -135,6 +150,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
     switch ($form_state['section']) {
       case 'use_batch':
         $this->set_option('use_batch', $form_state['values']['use_batch']);
+        $this->set_option('segment_size', $form_state['values']['segment_size']);
         break;
     }
   }
@@ -433,7 +449,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
 
           // Grab our results from the index, and push them into the view result.
           // TODO: Handle external databases.
-          $result = db_query_range('SELECT * FROM {' . $this->index_tablename() . '} ORDER BY ' . $this->batched_execution_state->sandbox['weight_field_alias'] . ' ASC', 0, 100);
+          $result = db_query_range('SELECT * FROM {' . $this->index_tablename() . '} ORDER BY ' . $this->batched_execution_state->sandbox['weight_field_alias'] . ' ASC', 0, $this->get_option('segment_size'));
           $this->view->result = array();
           foreach ($result as $item_hashed) {
             $item = new stdClass();
