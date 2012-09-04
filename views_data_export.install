@@ -17,14 +17,14 @@ function views_data_export_schema() {
       ),
       'view_name' => array(
         'type' => 'varchar',
-        'length' => '32',
+        'length' => '128',
         'default' => '',
         'not null' => TRUE,
         'description' => 'The unique name of the view. This is the primary field views are loaded from, and is used so that views may be internal and not necessarily in the database. May only be alphanumeric characters plus underscores.',
       ),
       'view_display_id' => array(
         'type' => 'varchar',
-        'length' => '32',
+        'length' => '64',
         'default' => '',
         'not null' => TRUE,
         'description' => 'The unique name of the view. This is the primary field views are loaded from, and is used so that views may be internal and not necessarily in the database. May only be alphanumeric characters plus underscores.',
@@ -114,6 +114,36 @@ function views_data_export_update_7100() {
   db_drop_field('views_data_export_object_cache', 'data');
   db_add_field('views_data_export_object_cache', 'data', $new_field);
 }
+
+/**
+ * Increase the length of the view_name field to match views_schema_7301().
+ */
+function views_data_export_update_7300() {
+  $fields = array();
+
+  $fields['view_name'] = array(
+    'type' => 'varchar',
+    'length' => '128',
+    'default' => '',
+    'not null' => TRUE,
+    'description' => 'The unique name of the view. This is the primary field views are loaded from, and is used so that views may be internal and not necessarily in the database. May only be alphanumeric characters plus underscores.',
+  );
+
+  $fields['view_display_id'] = array(
+    'type' => 'varchar',
+    'length' => '64',
+    'default' => '',
+    'not null' => TRUE,
+    'description' => 'An identifier for this display; usually generated from the display_plugin, so should be something like page or page_1 or block_2, etc.',
+  );
+
+  // Apply the updates to the DB.
+  foreach ($fields as $field_name => $spec) {
+    db_change_field('views_data_export', $field_name, $field_name, $spec);
+  }
+}
+
+
 
 /**
  * Implements hook_requirements().
