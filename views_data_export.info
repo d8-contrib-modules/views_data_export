@@ -11,26 +11,4 @@ dependencies[] = views
 files[] = plugins/views_data_export_plugin_display_export.inc
 files[] = plugins/views_data_export_plugin_style_export.inc
 files[] = plugins/views_data_export_plugin_style_export_csv.inc
-files[] = plugins/views_data_export_plugin_style_export_doc.inc
-files[] = plugins/views_data_export_plugin_style_export_txt.inc
-files[] = plugins/views_data_export_plugin_style_export_xls.inc
 files[] = plugins/views_data_export_plugin_style_export_xml.inc
-
-; Theme
-files[] = theme/views_data_export.theme.inc
-files[] = theme/views-data-export-csv-body.tpl.php
-files[] = theme/views-data-export-csv-footer.tpl.php
-files[] = theme/views-data-export-csv-header.tpl.php
-files[] = theme/views-data-export-doc-body.tpl.php
-files[] = theme/views-data-export-doc-footer.tpl.php
-files[] = theme/views-data-export-doc-header.tpl.php
-files[] = theme/views-data-export-txt-body.tpl.php
-files[] = theme/views-data-export-txt-footer.tpl.php
-files[] = theme/views-data-export-txt-header.tpl.php
-files[] = theme/views-data-export-xls-body.tpl.php
-files[] = theme/views-data-export-xls-footer.tpl.php
-files[] = theme/views-data-export-xls-header.tpl.php
-files[] = theme/views-data-export-xml-body.tpl.php
-files[] = theme/views-data-export-xml-footer.tpl.php
-files[] = theme/views-data-export-xml-header.tpl.php
-files[] = theme/views-data-export.tpl.php
