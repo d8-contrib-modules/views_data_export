@@ -259,13 +259,15 @@ function template_preprocess_views_data_export_msoffice_body(&$vars) {
 
   // Construct the tbody of a table, see theme_table().
 
-  $ts = tablesort_init($vars['header']);
+  $header = array_values($vars['header']);
+  $ts = tablesort_init($header);
 
   $flip = array(
     'even' => 'odd',
     'odd' => 'even',
   );
   $class = 'even';
+  $output = '';
   foreach ($vars['themed_rows'] as $number => $row) {
     $attributes = array();
 
@@ -326,7 +328,8 @@ function template_preprocess_views_data_export_msoffice_header(&$vars) {
   $vars['header_row'] = '';
   $vars['header_row'] .= '<thead><tr>';
 
-  $ts = tablesort_init($vars['header']);
+  $header = array_values($vars['header']);
+  $ts = tablesort_init($header);
 
   foreach ($vars['header'] as $cell) {
     $cell = tablesort_header($cell, $header, $ts);

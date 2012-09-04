@@ -336,7 +336,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
    */
   function execute_final() {
     // Should we download the file.
-    if ($_GET['download']) {
+    if (isset($_GET['download'])) {
       // This next method will exit.
       $this->transfer_file();
     }
@@ -440,7 +440,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
   function render_complete() {
     $return_path = empty($_GET['return-url']) ? '' : $_GET['return-url'];
 
-    return theme('views_data_export_complete_page', url($this->view->get_url(), array('query' => 'download=1&eid=' . $this->batched_execution_state->eid)), $this->errors, $return_path);
+    return theme('views_data_export_complete_page', url($this->view->get_url(), array('query' => 'download=1&eid=' . $this->batched_execution_state->eid)), array(), $return_path);
   }
 
   /**
