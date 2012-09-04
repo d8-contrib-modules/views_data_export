@@ -74,7 +74,13 @@ function drush_views_data_export_validate() {
   if (!$view->set_display($args[1])) {
     return drush_set_error('VIEW_DOES_NOT_EXIST', dt('The view !view does not have the !display display.', array ('!view' => $args[0], '!display' => $args[1])));
   }
-  
+  else {
+    if ($view->current_display != $args[1]) {
+      drush_log(dt('Using different display from specified display: @display', array('@display' => $view->current_display)), 'notice');
+    }
+    drush_set_option('views_data_export_display_id', $view->current_display);
+  }
+
   $format = drush_get_option('format');
   $valid_formats = array('csv', 'doc', 'txt', 'xls', 'xml');
   if (!empty($format) && !in_array($format, $valid_formats)) {
@@ -89,6 +95,9 @@ function drush_views_data_export_validate() {
  * @see views_data_export_views_data_export_batch_alter().
  */
 function drush_views_data_export($view_name, $display_id, $output_file) {
+
+  // Set the display to the one that we computed earlier.
+  $display_id = drush_get_option('views_data_export_display_id', 'default');
 
   $view = views_get_view($view_name);
 
