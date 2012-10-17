@@ -1,0 +1,113 @@
+<?php
+
+class XMLExportViewsDataExportTests extends ViewsDataExportBaseTest {
+
+  protected $profile = 'testing';
+
+  public static function getInfo() {
+    return array(
+      'name' => 'XML Export',
+      'description' => 'Various tests for exporting to XML.',
+      'group' => 'Views Data Export',
+    );
+  }
+
+  public function testNonBatchedExport() {
+    $view = $this->getXMLExportView();
+
+    $result = $view->execute_display('vde_test');
+    $expected = '<?xml version="1.0" encoding="UTF-8" ?>
+<views_tests>
+  <views_test>
+    <ID>1</ID>
+    <Name>John</Name>
+    <Age>25</Age>
+  </views_test>
+  <views_test>
+    <ID>2</ID>
+    <Name>George</Name>
+    <Age>27</Age>
+  </views_test>
+  <views_test>
+    <ID>3</ID>
+    <Name>Ringo</Name>
+    <Age>28</Age>
+  </views_test>
+  <views_test>
+    <ID>4</ID>
+    <Name>Paul</Name>
+    <Age>26</Age>
+  </views_test>
+  <views_test>
+    <ID>5</ID>
+    <Name>Meredith</Name>
+    <Age>30</Age>
+  </views_test>
+</views_tests>';
+
+    $this->assertExportEqual($result, $expected, 'Non batched XML export matched expected output.');
+  }
+
+  /**
+   * Build and return a basic view of the views_test table.
+   *
+   * @return view
+   */
+  protected function getXMLExportView() {
+    views_include('view');
+
+    // Create the basic view.
+    $view = new view();
+    $view->vid = 'test_view';
+    $view->base_table = 'views_test';
+
+    // Set up the fields we need.
+    $display = $view->new_display('default', 'Master', 'default');
+
+    $display->override_option('fields', array(
+      'id' => array(
+        'id' => 'id',
+        'table' => 'views_test',
+        'field' => 'id',
+        'relationship' => 'none',
+      ),
+      'name' => array(
+        'id' => 'name',
+        'table' => 'views_test',
+        'field' => 'name',
+        'relationship' => 'none',
+      ),
+      'age' => array(
+        'id' => 'age',
+        'table' => 'views_test',
+        'field' => 'age',
+        'relationship' => 'none',
+      ),
+    ));
+
+    // Set up the sort order.
+    $display->override_option('sorts', array(
+      'id' => array(
+        'order' => 'ASC',
+        'id' => 'id',
+        'table' => 'views_test',
+        'field' => 'id',
+        'relationship' => 'none',
+      ),
+    ));
+
+    // Set up the pager.
+    $display->override_option('pager', array(
+      'type' => 'none',
+      'options' => array('offset' => 0),
+    ));
+
+    $display = $view->new_display('views_data_export', 'Data export', 'vde_test');
+    $display->override_option('style_plugin', 'views_data_export_xml');
+    $display->override_option('path', 'vde_test');
+
+
+    return $view;
+  }
+
+}

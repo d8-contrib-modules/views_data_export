@@ -12,3 +12,11 @@ files[] = plugins/views_data_export_plugin_display_export.inc
 files[] = plugins/views_data_export_plugin_style_export.inc
 files[] = plugins/views_data_export_plugin_style_export_csv.inc
 files[] = plugins/views_data_export_plugin_style_export_xml.inc
+
+; Tests
+files[] = "tests/base.test"
+files[] = "tests/csv_export.test"
+files[] = "tests/doc_export.test"
+files[] = "tests/txt_export.test"
+files[] = "tests/xls_export.test"
+files[] = "tests/xml_export.test"

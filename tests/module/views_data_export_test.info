@@ -1,0 +1,5 @@
+name = "Views data export testing"
+version = VERSION
+core = 7.x
+dependencies[] = views_data_export
+hidden = TRUE

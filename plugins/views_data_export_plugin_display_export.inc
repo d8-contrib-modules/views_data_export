@@ -197,7 +197,11 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
    */
   function execute() {
     if (!$this->is_batched()) {
-      return parent::execute();
+      $output = $this->view->render();
+      if (empty($output)) {
+        return drupal_not_found();
+      }
+      return $output;
     }
 
     // Try and get a batch context if possible.
