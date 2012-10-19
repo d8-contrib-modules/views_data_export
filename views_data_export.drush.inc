@@ -111,7 +111,7 @@ function drush_views_data_export($view_name, $display_id, $output_file) {
     return;
   }
   $already_run = TRUE;
-  
+
   // Set the display to the one that we computed earlier.
   $display_id = drush_get_option('views_data_export_display_id', 'default');
 
@@ -161,8 +161,29 @@ function drush_views_data_export($view_name, $display_id, $output_file) {
   $options = array (
     'output_file' => realpath(drush_get_context('DRUSH_OLDCWD', getcwd())) . '/' . $output_file,
   );
-  _drush_views_data_export_override_batch($view_name, $display_id, $options);
-  $view->execute_display($display_id);
+  if ($view->display_handler->is_batched()) {
+    // This is a batched export, and needs to be handled as such.
+    _drush_views_data_export_override_batch($view_name, $display_id, $options);
+    $view->execute_display($display_id);
+  }
+  else {
+    // This export isn't batched.
+    ob_start();
+    $view->execute_display($display_id);
+    // Get the results, and clean the output buffer.
+    $result = ob_get_contents();
+    // Clean the buffer.
+    ob_end_clean();
+    // Save the results to file.
+    // Copy file over
+    if (file_put_contents($options['output_file'], $result)) {
+      drush_log("Data export saved to " . $options['output_file'], 'success');
+    }
+    else {
+      drush_set_error('VIEWS_DATA_EXPORT_COPY_ERROR', dt("The file could not be copied to the selected destination"));
+    }
+  }
+
 }
 
 
