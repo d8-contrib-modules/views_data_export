@@ -93,7 +93,7 @@ class views_data_export_plugin_style_export_csv extends views_data_export_plugin
       '#type' => 'textfield',
       '#title' => t('Replacement'),
       '#default_value' => $this->options['newline_replacement'],
-      '#process' => array('expand_checkboxes', 'views_process_dependency'),
+      '#process' => array('views_process_dependency'),
       '#dependency' => array('edit-style-options-replace-newlines' => array(TRUE)),
     );
     $form['header'] = array(
