@@ -58,7 +58,7 @@ function theme_views_data_export_feed_icon($variables) {
 function theme_views_data_export_complete_page($variables) {
   extract($variables, EXTR_SKIP);
   drupal_set_title(t('Data export successful'));
-  drupal_add_html_head(array('#tag' => 'meta', '#attributes' => array('http-equiv' =>"refresh", 'content' => '3;url='. $file)), 'views_data_export_download');
+  drupal_add_html_head(array('#tag' => 'meta', '#attributes' => array('http-equiv' =>"Refresh", 'content' => '3;url='. $file)), 'views_data_export_download');
   $output = '';
   $output .= '<p>';
   $output .= t('Your export has been created. View/download the file <a href="@link">here</a> (will automatically download in 3 seconds.)', array('@link' => $file));
@@ -119,7 +119,7 @@ function template_preprocess_views_data_export_csv_header(&$vars) {
             break;
         }
       }
-      
+
     $vars['header'][$key] = $wrap . str_replace('"', $replace_value, $output) . $wrap;
   }
 }
