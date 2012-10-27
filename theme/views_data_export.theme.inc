@@ -371,7 +371,9 @@ function template_preprocess_views_data_export_xml_footer(&$vars) {
  */
 function template_preprocess_views_data_export_xml_body(&$vars) {
   _views_data_export_header_shared_preprocess($vars);
-  _views_data_export_body_shared_preprocess($vars, TRUE);
+  // We support not outputting fields when they are empty, so indicate so.
+  $vars['hide_empty_support'] = TRUE;
+  _views_data_export_body_shared_preprocess($vars);
 
   // Compute the tag name based on the views base table, minus any trailing 's'.
   $vars['item_node'] = _views_data_export_xml_tag_clean(rtrim($vars['view']->base_table, 's'));
@@ -462,9 +464,10 @@ function _views_data_export_header_shared_preprocess(&$vars) {
 /**
  * Shared helper function for export preprocess functions.
  */
-function _views_data_export_body_shared_preprocess(&$vars, $hide_empty_support = FALSE) {
+function _views_data_export_body_shared_preprocess(&$vars) {
   $view     = $vars['view'];
   $fields   = &$view->field;
+  $hide_empty_support = !empty($vars['hide_empty_support']);
 
   $rows = $vars['rows'];
 
