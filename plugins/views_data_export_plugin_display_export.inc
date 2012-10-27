@@ -138,6 +138,20 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
           );
         }
         break;
+
+      case 'cache':
+        // We're basically going to disable using cache plugins, by disabling
+        // the UI.
+        if (isset($form['cache']['type']['#options'])) {
+          foreach ($form['cache']['type']['#options'] as $id => $v) {
+            if ($id != 'none') {
+              unset($form['cache']['type']['#options'][$id]);
+            }
+            $form['cache']['type']['#description'] = t("Views data export isn't currently compatible with caching plugins.");
+          }
+        }
+        break;
+
     }
   }
 
