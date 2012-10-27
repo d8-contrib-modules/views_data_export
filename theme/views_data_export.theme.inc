@@ -439,6 +439,12 @@ function _views_data_export_xml_tag_clean($tag) {
   // Need to trim invalid characters from the start of the string:
   $tag = ltrim($tag, $invalid_start_chars);
 
+  // As a last line of defense, if we've stripped out everything, set it to
+  // something.
+  if (empty($tag)) {
+    $tag = 'invalid-tag-name';
+  }
+
   return $tag;
 }
 
