@@ -155,6 +155,18 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
     }
   }
 
+  function get_option($option) {
+    // Force people to never use caching with Views data export. Sorry folks,
+    // but it causes too many issues for our workflow. If you really want to add
+    // caching back, then you can subclass this display handler and override
+    // this method to add it back.
+    if ($option == 'cache') {
+      return array('type' => 'none');
+    }
+
+    return parent::get_option($option);
+  }
+
   /**
    * Save the options from the options form.
    */
