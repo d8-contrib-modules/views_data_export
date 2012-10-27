@@ -371,7 +371,7 @@ function template_preprocess_views_data_export_xml_footer(&$vars) {
  */
 function template_preprocess_views_data_export_xml_body(&$vars) {
   _views_data_export_header_shared_preprocess($vars);
-  _views_data_export_body_shared_preprocess($vars);
+  _views_data_export_body_shared_preprocess($vars, TRUE);
 
   // Compute the tag name based on the views base table, minus any trailing 's'.
   $vars['item_node'] = _views_data_export_xml_tag_clean(rtrim($vars['view']->base_table, 's'));
@@ -462,7 +462,7 @@ function _views_data_export_header_shared_preprocess(&$vars) {
 /**
  * Shared helper function for export preprocess functions.
  */
-function _views_data_export_body_shared_preprocess(&$vars) {
+function _views_data_export_body_shared_preprocess(&$vars, $hide_empty_support = FALSE) {
   $view     = $vars['view'];
   $fields   = &$view->field;
 
@@ -475,7 +475,15 @@ function _views_data_export_body_shared_preprocess(&$vars) {
 
     foreach ($keys as $id) {
       if (empty($fields[$id]->options['exclude'])) {
-        $vars['themed_rows'][$num][$id] = $view->style_plugin->rendered_fields[$num][$id];
+        $content = $view->style_plugin->rendered_fields[$num][$id];
+
+        if ($hide_empty_support && !empty($fields[$id]->options['hide_empty'])) {
+          if ($content !== 0 && empty($content)) {
+            continue;
+          }
+        }
+
+        $vars['themed_rows'][$num][$id] = $content;
       }
     }
   }
