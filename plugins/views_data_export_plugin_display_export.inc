@@ -743,7 +743,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
   function  _get_database_driver() {
     $name = !empty($this->view->base_database) ? $this->view->base_database : 'default';
     $conn_info = Database::getConnectionInfo($name);
-    return $conn_info[$name]['driver'];
+    return $conn_info['default']['driver'];
   }
 }
 
