@@ -93,46 +93,48 @@ function views_data_export_cron() {
  *   garbage collect all exports.
  */
 function views_data_export_garbage_collect($expires = NULL, $chunk = NULL) {
-
-  if (!isset($expires)) {
-    $expires = variable_get('views_data_export_gc_expires', 604800); // one week
-  }
-  if (!isset($chunk)) {
-    $chunk = variable_get('views_data_export_gc_chunk', 30);
-  }
-
-  if ($chunk == -1) {
-    $qry = db_query("SELECT eid FROM {views_data_export} WHERE time_stamp <= %d ORDER BY time_stamp ASC", time() - $expires);
-  }
-  else {
-    $qry = db_query_range("SELECT eid FROM {views_data_export} WHERE time_stamp <= %d ORDER BY time_stamp ASC", time() - $expires, 0, $chunk);
-  }
-
-  $eids_to_clear = array();
-  while ($row = db_fetch_array($qry)) {
-    $eids_to_clear[] = $row['eid'];
-  }
-
-  // We do two things to exports we want to garbage collect
-  // 1. Delete the index table for it, if it is still around
-  // 2. Delete the row from the exports table
-  // 3. Delete the view from the object_cache
-  if (count($eids_to_clear)) {
-    $ret = array();
-    foreach ($eids_to_clear as $eid) {
-      // 1. Delete index table, if it is still around for some reason
-      $table = VIEWS_DATA_EXPORT_INDEX_TABLE_PREFIX . $eid;
-      if (db_table_exists($table)) {
-        db_drop_table($ret, $table);
-      }
+  if (lock_acquire('views_data_export_gc')) {
+    if (!isset($expires)) {
+      $expires = variable_get('views_data_export_gc_expires', 604800); // one week
+    }
+    if (!isset($chunk)) {
+      $chunk = variable_get('views_data_export_gc_chunk', 30);
     }
 
-    // 2. Delete the entries in the exports table.
-    db_query("DELETE FROM {views_data_export} WHERE eid IN (" . db_placeholders($eids_to_clear) . ")", $eids_to_clear);
+    if ($chunk == -1) {
+      $qry = db_query("SELECT eid FROM {views_data_export} WHERE time_stamp <= %d ORDER BY time_stamp ASC", time() - $expires);
+    }
+    else {
+      $qry = db_query_range("SELECT eid FROM {views_data_export} WHERE time_stamp <= %d ORDER BY time_stamp ASC", time() - $expires, 0, $chunk);
+    }
 
-    // 3. Clear the cached views
-    views_data_export_view_clear($eids_to_clear);
+    $eids_to_clear = array();
+    while ($row = db_fetch_array($qry)) {
+      $eids_to_clear[] = $row['eid'];
+    }
 
+    // We do two things to exports we want to garbage collect
+    // 1. Delete the index table for it, if it is still around
+    // 2. Delete the row from the exports table
+    // 3. Delete the view from the object_cache
+    if (count($eids_to_clear)) {
+      $ret = array();
+      foreach ($eids_to_clear as $eid) {
+        // 1. Delete index table, if it is still around for some reason
+        $table = VIEWS_DATA_EXPORT_INDEX_TABLE_PREFIX . $eid;
+        if (db_table_exists($table)) {
+          db_drop_table($ret, $table);
+        }
+      }
+
+      // 2. Delete the entries in the exports table.
+      db_query("DELETE FROM {views_data_export} WHERE eid IN (" . db_placeholders($eids_to_clear) . ")", $eids_to_clear);
+
+      // 3. Clear the cached views
+      views_data_export_view_clear($eids_to_clear);
+
+    }
+    lock_release('views_data_export_gc');
   }
 }
 
@@ -146,7 +148,7 @@ function _views_data_export_batch_process($export_id, $display_id, &$context) {
   if (module_exists('admin_menu')) {
     module_invoke('admin_menu', 'suppress');
   }
-  
+
   // Fetch the view in question from our cache
   $view = views_data_export_view_retrieve($export_id);
   $view->set_display($display_id);
