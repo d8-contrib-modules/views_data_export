@@ -107,10 +107,77 @@ class XMLExportViewsDataExportTests extends ViewsDataExportSimpleExportTest {
   </views_test>
 </views_tests>';
 
-  $message = 'Hide if empty support for ' . $this->vde_export_type . ' export matched expected output.';
+    $message = 'Hide if empty support for ' . $this->vde_export_type . ' export matched expected output.';
 
-  $this->executeAndCompareGivenView($view, $expected, $message);
+    $this->executeAndCompareGivenView($view, $expected, $message);
 
+  }
+
+  /**
+   * Test to ensure that valid XML is produced when someone doesn't specify a label.
+   */
+  protected function testEmptyLabels() {
+    $view = $this->getBasicExportView();
+
+    $display = $view->display['default']->handler;
+
+    $display->override_option('fields', array(
+      'id' => array(
+        'id' => 'id',
+        'table' => 'views_test',
+        'field' => 'id',
+        'relationship' => 'none',
+      ),
+      'name' => array(
+        'id' => 'name',
+        'table' => 'views_test',
+        'field' => 'name',
+        'relationship' => 'none',
+        // Remove the label from the name field.
+        'label' => '',
+      ),
+      'age' => array(
+        'id' => 'age',
+        'table' => 'views_test',
+        'field' => 'age',
+        'relationship' => 'none',
+        // Make this label intentially invalid XML.
+        'label' => '.',
+      ),
+    ));
+
+    $expected = '<?xml version="1.0" encoding="UTF-8" ?>
+<views_tests>
+  <views_test>
+    <ID>1</ID>
+    <no-name>John</no-name>
+    <invalid-tag-name>25</invalid-tag-name>
+  </views_test>
+  <views_test>
+    <ID>2</ID>
+    <no-name>George</no-name>
+    <invalid-tag-name>27</invalid-tag-name>
+  </views_test>
+  <views_test>
+    <ID>3</ID>
+    <no-name>Ringo</no-name>
+    <invalid-tag-name>28</invalid-tag-name>
+  </views_test>
+  <views_test>
+    <ID>4</ID>
+    <no-name>Paul</no-name>
+    <invalid-tag-name>26</invalid-tag-name>
+  </views_test>
+  <views_test>
+    <ID>5</ID>
+    <no-name>Meredith</no-name>
+    <invalid-tag-name>30</invalid-tag-name>
+  </views_test>
+</views_tests>';
+
+    $message = 'Empty label test in ' . $this->vde_export_type . ' export matched expected output.';
+
+    $this->executeAndCompareGivenView($view, $expected, $message);
   }
 
 }

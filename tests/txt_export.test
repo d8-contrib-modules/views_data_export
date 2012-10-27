@@ -155,9 +155,9 @@ Meredith
 30
 ----------------------------------------';
 
-  $message = 'Hide if empty support for ' . $this->vde_export_type . ' export matched expected output.';
+    $message = 'Hide if empty support for ' . $this->vde_export_type . ' export matched expected output.';
 
-  $this->executeAndCompareGivenView($view, $expected, $message);
+    $this->executeAndCompareGivenView($view, $expected, $message);
 
   }
 
