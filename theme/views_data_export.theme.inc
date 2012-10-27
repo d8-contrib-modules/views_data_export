@@ -242,6 +242,8 @@ function template_preprocess_views_data_export_csv(&$vars) {
  */
 function template_preprocess_views_data_export_txt_body(&$vars) {
   _views_data_export_header_shared_preprocess($vars);
+  // We support not outputting fields when they are empty, so indicate so.
+  $vars['hide_empty_support'] = TRUE;
   _views_data_export_body_shared_preprocess($vars);
 }
 
@@ -481,7 +483,7 @@ function _views_data_export_body_shared_preprocess(&$vars) {
         $content = $view->style_plugin->rendered_fields[$num][$id];
 
         if ($hide_empty_support && !empty($fields[$id]->options['hide_empty'])) {
-          if ($content !== 0 && empty($content)) {
+          if ($fields[$id]->is_value_empty($content, $fields[$id]->options['empty_zero'])) {
             continue;
           }
         }

@@ -14,12 +14,16 @@ class XLSExportViewsDataExportTests extends ViewsDataExportSimpleExportTest {
 
   protected $vde_export_type = 'XLS';
 
+  protected function getStylePluginName() {
+    return 'views_data_export_xls';
+  }
+
   protected function getExportView($path = 'vde_test') {
     // Create the basic view.
     $view = $this->getBasicExportView();
 
     $display = $view->new_display('views_data_export', 'Data export', 'vde_test');
-    $display->override_option('style_plugin', 'views_data_export_xls');
+    $display->override_option('style_plugin', $this->getStylePluginName());
     $display->override_option('path', $path);
 
     $expected = '<html>
