@@ -242,6 +242,8 @@ function template_preprocess_views_data_export_csv(&$vars) {
  */
 function template_preprocess_views_data_export_txt_body(&$vars) {
   _views_data_export_header_shared_preprocess($vars);
+  // We support not outputting fields when they are empty, so indicate so.
+  $vars['hide_empty_support'] = TRUE;
   _views_data_export_body_shared_preprocess($vars);
 }
 
@@ -371,6 +373,8 @@ function template_preprocess_views_data_export_xml_footer(&$vars) {
  */
 function template_preprocess_views_data_export_xml_body(&$vars) {
   _views_data_export_header_shared_preprocess($vars);
+  // We support not outputting fields when they are empty, so indicate so.
+  $vars['hide_empty_support'] = TRUE;
   _views_data_export_body_shared_preprocess($vars);
 
   // Compute the tag name based on the views base table, minus any trailing 's'.
@@ -465,6 +469,7 @@ function _views_data_export_header_shared_preprocess(&$vars) {
 function _views_data_export_body_shared_preprocess(&$vars) {
   $view     = $vars['view'];
   $fields   = &$view->field;
+  $hide_empty_support = !empty($vars['hide_empty_support']);
 
   $rows = $vars['rows'];
 
@@ -475,7 +480,15 @@ function _views_data_export_body_shared_preprocess(&$vars) {
 
     foreach ($keys as $id) {
       if (empty($fields[$id]->options['exclude'])) {
-        $vars['themed_rows'][$num][$id] = $view->style_plugin->rendered_fields[$num][$id];
+        $content = $view->style_plugin->rendered_fields[$num][$id];
+
+        if ($hide_empty_support && !empty($fields[$id]->options['hide_empty'])) {
+          if ($fields[$id]->is_value_empty($content, $fields[$id]->options['empty_zero'])) {
+            continue;
+          }
+        }
+
+        $vars['themed_rows'][$num][$id] = $content;
       }
     }
   }

@@ -332,6 +332,9 @@ abstract class ViewsDataExportSimpleExportTest extends ViewsDataExportBaseTest {
 
   protected $vde_export_type;
 
+  /**
+   * Tests the non-batched export functionality for this style.
+   */
   public function testNonBatchedExport() {
     $path = 'vde_test/' . $this->randomName();
     list($view, $expected) = $this->getExportView($path);
@@ -346,6 +349,9 @@ abstract class ViewsDataExportSimpleExportTest extends ViewsDataExportBaseTest {
     $this->assertExportEqual($result, $expected, 'Non batched ' . $this->vde_export_type . ' export matched expected output.');
   }
 
+  /**
+   * Tests the batched export functionality for this style.
+   */
   public function testBatchedExport() {
     $path = 'vde_test/' . $this->randomName();
     list($view, $expected) = $this->getExportView($path);
@@ -360,6 +366,15 @@ abstract class ViewsDataExportSimpleExportTest extends ViewsDataExportBaseTest {
     $this->assertBatchedExportEqual($path, $expected, 'Batched ' . $this->vde_export_type . ' export matched expected output.');
   }
 
+  /**
+   * Get a very basic view and expected output for this style.
+   *
+   * @return
+   *   An array containing two elements:
+   *   - A View object, for the export.
+   *   - The expected out from that view, if is was executed without further
+   *     changes.
+   */
   abstract protected function getExportView($path = 'vde_test');
 
   /**
@@ -418,4 +433,75 @@ abstract class ViewsDataExportSimpleExportTest extends ViewsDataExportBaseTest {
 
     return $view;
   }
+
+  /**
+   * Get a view that's our basic view, but with hide if empty/0 support.
+   *
+   * We add this to the 'age' field.
+   */
+  protected function getHideIfEmptyExportView() {
+    $view = $this->getBasicExportView();
+
+    $display = $view->display['default']->handler;
+
+    $display->override_option('fields', array(
+      'id' => array(
+        'id' => 'id',
+        'table' => 'views_test',
+        'field' => 'id',
+        'relationship' => 'none',
+      ),
+      'name' => array(
+        'id' => 'name',
+        'table' => 'views_test',
+        'field' => 'name',
+        'relationship' => 'none',
+        // Hide their name if its empty.
+        'hide_empty' => TRUE,
+        // But we don't hide it if it's: 0.
+        'empty_zero' => FALSE,
+      ),
+      'age' => array(
+        'id' => 'age',
+        'table' => 'views_test',
+        'field' => 'age',
+        'relationship' => 'none',
+        // Hide their age if it's empty.
+        'hide_empty' => TRUE,
+        'empty_zero' => TRUE,
+      ),
+    ));
+
+    return $view;
+  }
+
+  /**
+   * Execute a given view very simply.
+   *
+   * This will take a view, and add a display plugin of the correct export type,
+   * and then run it and compare it with the expected output.
+   */
+  protected function executeAndCompareGivenView(view $view, $expected, $message = '') {
+    $path = 'vde_test/' . $this->randomName();
+
+    $display = $view->new_display('views_data_export', 'Data export', 'vde_test');
+    $display->override_option('style_plugin', $this->getStylePluginName());
+    $display->override_option('path', $path);
+
+    // Save this view so we can hit the path.
+    $view->save();
+
+    // Ensure that the menu router system is rebuilt on the next page load.
+    variable_set('menu_rebuild_needed', TRUE);
+
+    $this->drupalGet($path);
+    $result = $this->drupalGetContent();
+
+    $this->assertExportEqual($result, $expected, $message);
+  }
+
+  /**
+   * Return the name of the style plugin represented by this test.
+   */
+  abstract protected function getStylePluginName();
 }
