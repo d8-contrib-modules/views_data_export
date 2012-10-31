@@ -36,4 +36,73 @@ class CSVExportViewsDataExportTests extends ViewsDataExportSimpleExportTest {
     return array(&$view, $expected);
   }
 
+  /**
+   * Test to ensure that HTML tags are kept in CSV files when requested.
+   */
+  protected function testKeepHTML() {
+    $view = $this->getBasicExportView();
+
+    $display = $view->display['default']->handler;
+
+    $display->override_option('fields', array(
+      'id' => array(
+        'id' => 'id',
+        'table' => 'views_test',
+        'field' => 'id',
+        'relationship' => 'none',
+        // Add a label to include HTML
+        'label' => '<strong>ID</strong>',
+      ),
+      'name' => array(
+        'id' => 'name',
+        'table' => 'views_test',
+        'field' => 'name',
+        'relationship' => 'none',
+        // Alter this field to include HTML.
+        'alter' => array(
+          'alter_text' => TRUE,
+          'text' => '<em>[name]</em>',
+        ),
+      ),
+      'age' => array(
+        'id' => 'age',
+        'table' => 'views_test',
+        'field' => 'age',
+        'relationship' => 'none',
+      ),
+    ));
+
+    $style_options = array(
+      'keep_html' => TRUE,
+    );
+
+    $expected = '"<strong>ID</strong>","Name","Age"
+"1","<em>John</em>","25"
+"2","<em>George</em>","27"
+"3","<em>Ringo</em>","28"
+"4","<em>Paul</em>","26"
+"5","<em>Meredith</em>","30"';
+
+    $message = 'Keep HTML test in ' . $this->vde_export_type . ' export matched expected output.';
+
+    $this->executeAndCompareGivenView($view, $expected, $message, $style_options);
+
+
+    // And now make sure that HTML tags are stripped correctly.
+    $style_options = array(
+      'keep_html' => FALSE,
+    );
+
+    $expected = '"ID","Name","Age"
+"1","John","25"
+"2","George","27"
+"3","Ringo","28"
+"4","Paul","26"
+"5","Meredith","30"';
+
+    $message = 'Keep HTML reverse test in ' . $this->vde_export_type . ' export matched expected output.';
+
+    $this->executeAndCompareGivenView($view, $expected, $message, $style_options);
+  }
+
 }

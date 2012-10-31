@@ -481,11 +481,12 @@ abstract class ViewsDataExportSimpleExportTest extends ViewsDataExportBaseTest {
    * This will take a view, and add a display plugin of the correct export type,
    * and then run it and compare it with the expected output.
    */
-  protected function executeAndCompareGivenView(view $view, $expected, $message = '') {
+  protected function executeAndCompareGivenView(view $view, $expected, $message = '', $style_options = array()) {
     $path = 'vde_test/' . $this->randomName();
 
     $display = $view->new_display('views_data_export', 'Data export', 'vde_test');
     $display->override_option('style_plugin', $this->getStylePluginName());
+    $display->override_option('style_options', $style_options);
     $display->override_option('path', $path);
 
     // Save this view so we can hit the path.
