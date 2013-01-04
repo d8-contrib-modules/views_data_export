@@ -535,7 +535,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
         // Change the items per page.
         $this->view->set_items_per_page(20);
         // Force a pager to be used.
-        $this->set_option('pager', array('type' => 'some'));
+        $this->set_option('pager', array('type' => 'some', 'options' => array()));
         return '<p>' . t('A maximum of 20 items will be shown here, all results will be shown on export.') . '</p><pre>' . check_plain($this->view->render()) . '</pre>';
       }
       return $this->view->render();
