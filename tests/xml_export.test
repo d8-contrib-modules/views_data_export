@@ -180,4 +180,56 @@ class XMLExportViewsDataExportTests extends ViewsDataExportSimpleExportTest {
     $this->executeAndCompareGivenView($view, $expected, $message);
   }
 
+  /**
+   * Test to ensure that XML nodes names can be manually specified.
+   */
+  protected function testCustomiseXMLNodes() {
+    $view = $this->getBasicExportView();
+
+    // Load the include that contains the _views_data_export_xml_tag_clean function.
+    module_load_include('inc', 'views_data_export', 'theme/views_data_export.theme');
+
+
+    $root_node = _views_data_export_xml_tag_clean($this->randomName());
+    $item_node = _views_data_export_xml_tag_clean($this->randomName());
+
+    $style_options = array(
+      'root_node' => $root_node,
+      'item_node' => $item_node,
+    );
+
+    $expected = '<?xml version="1.0" encoding="UTF-8" ?>
+<' . $root_node . '>
+  <' . $item_node . '>
+    <ID>1</ID>
+    <Name>John</Name>
+    <Age>25</Age>
+  </' . $item_node . '>
+  <' . $item_node . '>
+    <ID>2</ID>
+    <Name>George</Name>
+    <Age>27</Age>
+  </' . $item_node . '>
+  <' . $item_node . '>
+    <ID>3</ID>
+    <Name>Ringo</Name>
+    <Age>28</Age>
+  </' . $item_node . '>
+  <' . $item_node . '>
+    <ID>4</ID>
+    <Name>Paul</Name>
+    <Age>26</Age>
+  </' . $item_node . '>
+  <' . $item_node . '>
+    <ID>5</ID>
+    <Name>Meredith</Name>
+    <Age>30</Age>
+  </' . $item_node . '>
+</' . $root_node . '>';
+
+    $message = 'Custom XML nodes test in ' . $this->vde_export_type . ' export matched expected output.';
+
+    $this->executeAndCompareGivenView($view, $expected, $message, $style_options);
+  }
+
 }

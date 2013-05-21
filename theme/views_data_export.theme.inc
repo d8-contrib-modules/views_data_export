@@ -350,24 +350,14 @@ function template_preprocess_views_data_export_msoffice_header(&$vars) {
  * Preprocess xml output template.
  */
 function template_preprocess_views_data_export_xml_header(&$vars) {
-  // Compute the root XML node, using the base table, and appending an 's' if needed.
-  $root_node = $vars['view']->base_table;
-  if (rtrim($root_node, 's') == $root_node) {
-    $root_node .= 's';
-  }
-  $vars['root_node'] = _views_data_export_xml_tag_clean($root_node);
+  $vars['root_node'] = _views_data_export_xml_tag_clean($vars['options']['root_node']);
 }
 
 /**
  * Preprocess xml output template.
  */
 function template_preprocess_views_data_export_xml_footer(&$vars) {
-  // Compute the root XML node, using the base table, and appending an 's' if needed.
-  $root_node = $vars['view']->base_table;
-  if (rtrim($root_node, 's') == $root_node) {
-    $root_node .= 's';
-  }
-  $vars['root_node'] = _views_data_export_xml_tag_clean($root_node);
+  $vars['root_node'] = _views_data_export_xml_tag_clean($vars['options']['root_node']);
 }
 
 /**
@@ -379,8 +369,7 @@ function template_preprocess_views_data_export_xml_body(&$vars) {
   $vars['hide_empty_support'] = TRUE;
   _views_data_export_body_shared_preprocess($vars);
 
-  // Compute the tag name based on the views base table, minus any trailing 's'.
-  $vars['item_node'] = _views_data_export_xml_tag_clean(rtrim($vars['view']->base_table, 's'));
+  $vars['item_node'] = _views_data_export_xml_tag_clean($vars['options']['item_node']);
 
   foreach ($vars['themed_rows'] as $num => $row) {
     foreach ($row as $field => $content) {

@@ -12,6 +12,26 @@
 class views_data_export_plugin_style_export_xml extends views_data_export_plugin_style_export {
 
   /**
+   * Initialize a style plugin.
+   */
+  function init(&$view, &$display, $options = NULL) {
+    // View is not set in option_definition(), so we fill defaults here if
+    // options are empty.
+    if (empty($options['root_node']) || empty($options['item_node'])) {
+      $base_object_name = rtrim($view->base_table, 's');
+
+      if (empty($options['root_node'])) {
+        $options['root_node'] = $base_object_name . 's';
+      }
+      if (empty($options['item_node'])) {
+        $options['item_node'] = $base_object_name;
+      }
+    }
+
+    parent::init($view, $display, $options);
+  }
+
+  /**
    * Set options fields and default values.
    *
    * @return
@@ -26,6 +46,14 @@ class views_data_export_plugin_style_export_xml extends views_data_export_plugin
     );
     $options['transform_type'] = array(
       'default' => 'dash',
+      'translatable' => FALSE,
+    );
+    $options['root_node'] = array(
+      'default' => '',
+      'translatable' => FALSE,
+    );
+    $options['item_node'] = array(
+      'default' => '',
       'translatable' => FALSE,
     );
 
@@ -65,6 +93,18 @@ class views_data_export_plugin_style_export_xml extends views_data_export_plugin
       '#dependency' => array(
         'edit-style-options-transform' => array(TRUE),
       ),
+    );
+    $form['root_node'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Root node'),
+      '#default_value' => $this->options['root_node'],
+      '#description' => t('The XML tag for the root node.'),
+    );
+    $form['item_node'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Item node'),
+      '#default_value' => $this->options['item_node'],
+      '#description' => t('The XML tag for an item node.'),
     );
   }
 }
