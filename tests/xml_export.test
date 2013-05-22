@@ -232,4 +232,81 @@ class XMLExportViewsDataExportTests extends ViewsDataExportSimpleExportTest {
     $this->executeAndCompareGivenView($view, $expected, $message, $style_options);
   }
 
+  /**
+   * Test to ensure that valid XML is produced when someone doesn't specify a label.
+   */
+  protected function testXMLInValuesLabels() {
+    $view = $this->getBasicExportView();
+
+    $display = $view->display['default']->handler;
+
+    $style_options = array(
+      'no_entity_encode' => array(
+        'id' => 'id',
+      ),
+    );
+
+    $display->override_option('fields', array(
+      'id' => array(
+        'id' => 'id',
+        'table' => 'views_test',
+        'field' => 'id',
+        'relationship' => 'none',
+        'alter' => array(
+          'alter_text' => TRUE,
+          'text' => '<strong>[id]</strong>',
+        ),
+      ),
+      'name' => array(
+        'id' => 'name',
+        'table' => 'views_test',
+        'field' => 'name',
+        'relationship' => 'none',
+        'alter' => array(
+          'alter_text' => TRUE,
+          'text' => '<em>[name]</em>',
+        ),
+      ),
+      'age' => array(
+        'id' => 'age',
+        'table' => 'views_test',
+        'field' => 'age',
+        'relationship' => 'none',
+      ),
+    ));
+
+    $expected = '<?xml version="1.0" encoding="UTF-8" ?>
+<views_tests>
+  <views_test>
+    <ID><strong>1</strong></ID>
+    <Name>&lt;em&gt;John&lt;/em&gt;</Name>
+    <Age>25</Age>
+  </views_test>
+  <views_test>
+    <ID><strong>2</strong></ID>
+    <Name>&lt;em&gt;George&lt;/em&gt;</Name>
+    <Age>27</Age>
+  </views_test>
+  <views_test>
+    <ID><strong>3</strong></ID>
+    <Name>&lt;em&gt;Ringo&lt;/em&gt;</Name>
+    <Age>28</Age>
+  </views_test>
+  <views_test>
+    <ID><strong>4</strong></ID>
+    <Name>&lt;em&gt;Paul&lt;/em&gt;</Name>
+    <Age>26</Age>
+  </views_test>
+  <views_test>
+    <ID><strong>5</strong></ID>
+    <Name>&lt;em&gt;Meredith&lt;/em&gt;</Name>
+    <Age>30</Age>
+  </views_test>
+</views_tests>';
+
+    $message = 'XML in values test in ' . $this->vde_export_type . ' export matched expected output.';
+
+    $this->executeAndCompareGivenView($view, $expected, $message, $style_options);
+  }
+
 }

@@ -56,6 +56,10 @@ class views_data_export_plugin_style_export_xml extends views_data_export_plugin
       'default' => '',
       'translatable' => FALSE,
     );
+    $options['no_entity_encode'] = array(
+      'default' => array(),
+      'translatable' => FALSE,
+    );
 
     return $options;
   }
@@ -106,5 +110,40 @@ class views_data_export_plugin_style_export_xml extends views_data_export_plugin
       '#default_value' => $this->options['item_node'],
       '#description' => t('The XML tag for an item node.'),
     );
+
+    $field_labels = $this->display->handler->get_field_labels();
+
+    if (!empty($field_labels)) {
+      $options = $field_labels;
+      if (empty($this->options['no_entity_encode'])) {
+        $this->options['no_entity_encode'] = array();
+      }
+
+      $form['no_entity_encode'] = array(
+        '#type' => 'checkboxes',
+        '#title' => t('Disable encoding of XML entities for these fields'),
+        '#options' => $options,
+        '#default_value' => $this->options['no_entity_encode'],
+        '#description' => t('If checked field contents will be outputted '.
+                            '<em>without encoding</em> of XML entities. This is '.
+                            'useful when when used in conjunction with a field '.
+                            'formatter that outputs properly formatted and '.
+                            'encoded XML data.'),
+      );
+    }
+  }
+
+  /**
+  +   * Perform any necessary changes to the form values prior to storage.
+  +   * There is no need for this function to actually store the data.
+  +   *
+  +   * @param $form
+  +   * @param $form_state
+  +   */
+  function options_submit(&$form, &$form_state) {
+    if (isset($form_state['values']['style_options']['no_entity_encode'])) {
+      // Remove any options values set to 0
+      $form_state['values']['style_options']['no_entity_encode'] = array_filter($form_state['values']['style_options']['no_entity_encode']);
+    }
   }
 }

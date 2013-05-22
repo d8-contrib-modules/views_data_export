@@ -41,7 +41,7 @@ function theme_views_data_export_message($var) {
  */
 function theme_views_data_export_feed_icon($variables) {
   extract($variables, EXTR_SKIP);
-  $url_options = array('html' => true);
+  $url_options = array('html' => TRUE);
   if ($query) {
     $url_options['query'] = $query;
   }
@@ -369,17 +369,29 @@ function template_preprocess_views_data_export_xml_body(&$vars) {
   $vars['hide_empty_support'] = TRUE;
   _views_data_export_body_shared_preprocess($vars);
 
+  $view = $vars['view'];
+  $style_options = $view->display_handler->get_option('style_options');
+
+  $no_encode = isset($style_options['no_entity_encode']) ? $style_options['no_entity_encode'] : array();
+
   $vars['item_node'] = _views_data_export_xml_tag_clean($vars['options']['item_node']);
 
   foreach ($vars['themed_rows'] as $num => $row) {
     foreach ($row as $field => $content) {
-      // Prevent double encoding of the ampersand. Look for the entities produced by check_plain().
-      $content = preg_replace('/&(?!(amp|quot|#039|lt|gt);)/', '&amp;', $content);
-      // Convert < and > to HTML entities.
-      $content = str_replace(
-        array('<', '>'),
-        array('&lt;', '&gt;'),
-        $content);
+
+      // Perform xml entity encoding unless excluded by style options.
+      if (empty($no_encode[$field])) {
+
+        // Prevent double encoding of the ampersand. Look for the entities produced by check_plain().
+        $content = preg_replace('/&(?!(amp|quot|#039|lt|gt);)/', '&amp;', $content);
+        // Convert < and > to HTML entities.
+        $content = str_replace(
+          array('<', '>'),
+          array('&lt;', '&gt;'),
+          $content);
+
+      }
+
       $vars['themed_rows'][$num][$field] = $content;
     }
   }
