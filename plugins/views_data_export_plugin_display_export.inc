@@ -561,7 +561,16 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
         $select_aliases[] = "cl.$alias AS $hash";
       }
 
-      $insert_query = 'CREATE TABLE {' . $this->index_tablename() . '} SELECT @row := @row + 1 AS ' . $this->batched_execution_state->sandbox['weight_field_alias'] . ', ' . implode(', ', $select_aliases) . ' FROM (' . $query . ') AS cl, (SELECT @row := 0) AS r';
+      if ($this->_get_database_driver() == 'pgsql') {
+        // Create temporary sequence
+        $seq_name = $this->index_tablename() . '_seq';
+        $create_seq_query = 'CREATE TEMP sequence ' . $seq_name;
+        // query uses sequence to create row number
+        $insert_query = 'CREATE TABLE {' . $this->index_tablename() . "} AS SELECT nextval('".$seq_name."') AS " . $this->batched_execution_state->sandbox['weight_field_alias'] . ', ' . implode(', ', $select_aliases) . ' FROM (' . $query . ') AS cl';
+      }
+      else {
+        $insert_query = 'CREATE TABLE {' . $this->index_tablename() . '} SELECT @row := @row + 1 AS ' . $this->batched_execution_state->sandbox['weight_field_alias'] . ', ' . implode(', ', $select_aliases) . ' FROM (' . $query . ') AS cl, (SELECT @row := 0) AS r';
+      }
 
       // Allow for a view to query an external database.
       if (isset($view->base_database)) {
@@ -569,6 +578,9 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
         $external = TRUE;
       }
 
+      if ($this->_get_database_driver() == 'pgsql') {
+        db_query($create_seq_query);
+      }
       db_query($insert_query, $args);
 
       // Now create an index for the weight field, otherwise the queries on the
@@ -797,7 +809,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
    */
   function is_compatible() {
     $incompatible_drivers = array (
-      'pgsql',
+      //'pgsql',
     );
     $db_driver = $this->_get_database_driver();
     return !in_array($db_driver, $incompatible_drivers);
