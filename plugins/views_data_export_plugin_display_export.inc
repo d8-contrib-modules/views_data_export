@@ -642,9 +642,14 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
    * Get the output file path.
    */
   function outputfile_path() {
-    if (empty($this->_output_file) && !empty($this->batched_execution_state->fid)) {
-      // Return the filename associated with this file.
-      $this->_output_file = $this->file_load($this->batched_execution_state->fid);
+    if (empty($this->_output_file)) {
+      if (!empty($this->batched_execution_state->fid)) {
+        // Return the filename associated with this file.
+        $this->_output_file = $this->file_load($this->batched_execution_state->fid);
+      }
+      else {
+        return NULL;
+      }
     }
     return $this->_output_file->uri;
   }
