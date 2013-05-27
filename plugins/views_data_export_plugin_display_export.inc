@@ -260,7 +260,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
     //Set the batch off
     $batch = array(
       'operations' => array (
-        array('_views_data_export_batch_process', array($this->batched_execution_state->eid, $this->view->current_display)),
+        array('_views_data_export_batch_process', array($this->batched_execution_state->eid, $this->view->current_display,  $this->view->get_exposed_input())),
       ),
       'title' => t('Building export'),
       'init_message' => t('Export is starting up.'),
@@ -277,6 +277,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
     // e.g. Drush to grab this batch and yet execute it in
     // it's own special way
     $batch['view_name'] = $this->view->name;
+    $batch['exposed_filters'] = $this->view->get_exposed_input();
     $batch['display_id'] = $this->view->current_display;
     $batch['eid'] = $this->batched_execution_state->eid;
     $batch['__drupal_alter_by_ref']['final_destination'] = &$final_destination;
