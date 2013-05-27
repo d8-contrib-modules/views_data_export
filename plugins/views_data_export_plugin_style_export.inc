@@ -319,7 +319,14 @@ class views_data_export_plugin_style_export extends views_plugin_style {
           continue;
         }
         if (!empty($view->exposed_input[$handler->options['expose']['identifier']])) {
-          $exposed[] = check_plain($handler->options['expose']['identifier']) . '_' . check_plain($view->exposed_input[$handler->options['expose']['identifier']]);
+          $identifier = $handler->options['expose']['identifier'];
+          $option = $view->exposed_input[$identifier];
+          // The option may be a string or an array, depending on whether the
+          // widget is a text box/area or a select box.
+          if (is_array($option)) {
+            $option = implode('--', $option);
+          }
+          $exposed[] = check_plain($identifier) . '_' . check_plain($option);
         }
       }
       if (!empty($exposed)) {
