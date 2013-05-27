@@ -105,4 +105,40 @@ class CSVExportViewsDataExportTests extends ViewsDataExportSimpleExportTest {
     $this->executeAndCompareGivenView($view, $expected, $message, $style_options);
   }
 
+  /**
+   * Test to ensure that Encoding options work.
+   */
+  protected function testIconvEncoding() {
+    $view = $this->getBasicExportView();
+
+    db_update('views_test')
+      ->fields(array('name' => 'Jo€hn'))
+      ->condition('name', 'John')
+      ->execute();
+
+    $encodings = array(
+      'ISO-8859-1//TRANSLIT' => 'EUR',
+      'utf8_decode' => '?',
+    );
+
+    foreach ($encodings as $encoding => $conversion) {
+
+      $style_options = array(
+        'encoding' => $encoding,
+      );
+
+      $expected = '"ID","Name","Age"
+"1","Jo' . $conversion . 'hn","25"
+"2","George","27"
+"3","Ringo","28"
+"4","Paul","26"
+"5","Meredith","30"';
+
+      $message = 'Character encoding ' . $encoding . ' worked correctly.';
+
+      $this->executeAndCompareGivenView($view, $expected, $message, $style_options);
+    }
+
+  }
+
 }
