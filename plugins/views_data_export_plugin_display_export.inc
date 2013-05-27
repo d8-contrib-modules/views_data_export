@@ -666,7 +666,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
   protected function outputfile_write($string) {
     $output_file = $this->outputfile_path();
     $handle = fopen($output_file, 'a');
-    if (fwrite($handle, $string) === FALSE) {
+    if (fwrite($handle, $string) === FALSE || fclose($handle) === FALSE) {
       $this->abort_export(t('Could not write to temporary output file for result export (@file). Check permissions.', array ('@file' => $output_file)));
     }
     // Ensure that the temp file has the correct permissions.
