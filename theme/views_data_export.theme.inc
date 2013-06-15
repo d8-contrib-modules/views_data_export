@@ -379,13 +379,15 @@ function template_preprocess_views_data_export_xml_body(&$vars) {
 
   $no_encode = isset($style_options['no_entity_encode']) ? $style_options['no_entity_encode'] : array();
 
+  $cdata_wrapper = isset($style_options['cdata_wrapper']) ? $style_options['cdata_wrapper'] : array();
+
   $vars['item_node'] = _views_data_export_xml_tag_clean($vars['options']['item_node']);
 
   foreach ($vars['themed_rows'] as $num => $row) {
     foreach ($row as $field => $content) {
 
       // Perform xml entity encoding unless excluded by style options.
-      if (empty($no_encode[$field])) {
+      if (empty($no_encode[$field]) && empty($cdata_wrapper[$field])) {
 
         // Prevent double encoding of the ampersand. Look for the entities produced by check_plain().
         $content = preg_replace('/&(?!(amp|quot|#039|lt|gt);)/', '&amp;', $content);
@@ -394,7 +396,13 @@ function template_preprocess_views_data_export_xml_body(&$vars) {
           array('<', '>'),
           array('&lt;', '&gt;'),
           $content);
+      }
 
+      // Perform wrapping the field data using the CDATA tag
+      // unless excluded by style options.
+      if (!empty($cdata_wrapper[$field])) {
+        // Escape CDATA end sequence only.
+        $content = '<![CDATA[' . str_replace(']]>', ']]]]><![CDATA[>', $content) . ']]>';
       }
 
       $vars['themed_rows'][$num][$field] = $content;

@@ -60,6 +60,10 @@ class views_data_export_plugin_style_export_xml extends views_data_export_plugin
       'default' => array(),
       'translatable' => FALSE,
     );
+    $options['cdata_wrapper'] = array(
+      'default' => array(),
+      'translatable' => FALSE,
+    );
 
     return $options;
   }
@@ -130,20 +134,36 @@ class views_data_export_plugin_style_export_xml extends views_data_export_plugin
                             'formatter that outputs properly formatted and '.
                             'encoded XML data.'),
       );
+
+      if (empty($this->options['cdata_wrapper'])) {
+        $this->options['cdata_wrapper'] = array();
+      }
+
+      $form['cdata_wrapper'] = array(
+        '#type' => 'checkboxes',
+        '#title' => t('Fields value to wrapped using CDATA'),
+        '#options' => $options,
+        '#default_value' => $this->options['cdata_wrapper'],
+        '#description' => t('If checked the fields content will be wrapped using the CDATA tag.'),
+      );
     }
   }
 
   /**
-  +   * Perform any necessary changes to the form values prior to storage.
-  +   * There is no need for this function to actually store the data.
-  +   *
-  +   * @param $form
-  +   * @param $form_state
-  +   */
+   * Perform any necessary changes to the form values prior to storage.
+   * There is no need for this function to actually store the data.
+   *
+   * @param $form
+   * @param $form_state
+   */
   function options_submit(&$form, &$form_state) {
     if (isset($form_state['values']['style_options']['no_entity_encode'])) {
       // Remove any options values set to 0
       $form_state['values']['style_options']['no_entity_encode'] = array_filter($form_state['values']['style_options']['no_entity_encode']);
+    }
+    if (isset($form_state['values']['style_options']['cdata_wrapper'])) {
+      // Remove any options values set to 0
+      $form_state['values']['style_options']['cdata_wrapper'] = array_filter($form_state['values']['style_options']['cdata_wrapper']);
     }
   }
 }
