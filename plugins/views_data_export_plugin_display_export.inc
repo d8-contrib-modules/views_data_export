@@ -132,7 +132,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
         $form['return_path'] = array(
           '#title' => t('Return path'),
           '#type' => 'textfield',
-          '#description' => t('Return path after the batched operation, leave empty for default.'),
+          '#description' => t('Return path after the batched operation, leave empty for default. This path will only be used if the export URL is visited directly, and not by following a link when attached to another view display.'),
           '#default_value' => $this->get_option('return_path'),
           '#dependency' => array(
             'radio:use_batch' => array('batch')
