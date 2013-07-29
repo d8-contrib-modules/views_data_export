@@ -686,7 +686,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
    */
   protected function outputfile_create() {
 
-    $dir = 'temporary://views_plugin_display';
+    $dir = variable_get('views_data_export_directory', 'temporary://views_plugin_display');
 
     // Make sure the directory exists first.
     if (!file_prepare_directory($dir, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {

@@ -163,7 +163,7 @@ function views_data_export_requirements($phase) {
         'value' => t('Exists'),
       );
 
-      $path = 'temporary://views_plugin_display';
+      $path = variable_get('views_data_export_directory', 'temporary://views_plugin_display');
       if (!file_prepare_directory($path, FILE_CREATE_DIRECTORY)) {
         $requirements['views_data_export_temp']['description'] = t('The Views Data Export temporary directory, %path could not be created due to a misconfigured directory. Please ensure that the temporary directory is correctly configured and that the webserver has permission to create directories.', array('%path' => file_uri_target($path)));
         $requirements['views_data_export_temp']['severity'] = REQUIREMENT_ERROR;
