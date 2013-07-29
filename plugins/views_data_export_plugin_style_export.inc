@@ -291,7 +291,6 @@ class views_data_export_plugin_style_export extends views_plugin_style {
    * Add any HTTP headers that this style plugin wants to.
    */
   function add_http_headers() {
-    $view = &$this->view;
 
     drupal_add_http_header('Cache-Control', 'max-age=60, must-revalidate');
 
@@ -300,6 +299,22 @@ class views_data_export_plugin_style_export extends views_plugin_style {
         drupal_add_http_header($name, $value);
       }
     }
+
+    if (isset($this->options['filename']) && !empty($this->options['provide_file'])) {
+      $filename = $this->generate_filename();
+
+      if ($filename) {
+        drupal_add_http_header('Content-Disposition', 'attachment; filename="'. $filename .'"');
+      }
+    }
+  }
+
+  /**
+   * Generate the filename for the export.
+   */
+  function generate_filename() {
+    $view = $this->view;
+    $filename = '';
 
     if (isset($this->options['filename']) && !empty($this->options['provide_file'])) {
       // General tokens.
@@ -358,11 +373,8 @@ class views_data_export_plugin_style_export extends views_plugin_style {
       }
 
       $filename = strtr($this->options['filename'], $tokens);
-
-
-      if ($filename) {
-        drupal_add_http_header('Content-Disposition', 'attachment; filename="'. $filename .'"');
-      }
     }
+
+    return $filename;
   }
 }
