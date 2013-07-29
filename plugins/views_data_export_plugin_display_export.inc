@@ -63,6 +63,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
     $options = parent::option_definition();
     $options['use_batch'] = array('default' => 'no_batch');
     $options['items_per_page'] = array('default' => '0');
+    $options['return_path'] = array('default' => '');
     $options['style_plugin']['default'] = 'views_data_export_csv';
 
     // This is the default size of a segment when doing a batched export.
@@ -128,6 +129,15 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
             'radio:use_batch' => array('batch')
           ),
         );
+        $form['return_path'] = array(
+          '#title' => t('Return path'),
+          '#type' => 'textfield',
+          '#description' => t('Return path after the batched operation, leave empty for default.'),
+          '#default_value' => $this->get_option('return_path'),
+          '#dependency' => array(
+            'radio:use_batch' => array('batch')
+          ),
+        );
         if (!$this->is_compatible()) {
           $form['use_batch']['#disabled'] = TRUE;
           $form['use_batch']['#default_value'] = 'no_batch';
@@ -177,6 +187,7 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
       case 'use_batch':
         $this->set_option('use_batch', $form_state['values']['use_batch']);
         $this->set_option('segment_size', $form_state['values']['segment_size']);
+        $this->set_option('return_path', $form_state['values']['return_path']);
         break;
     }
   }
@@ -300,6 +311,10 @@ class views_data_export_plugin_display_export extends views_plugin_display_feed 
     if (!empty($_GET['attach']) && isset($this->view->display[$_GET['attach']])) {
       // Get the path of the attached display:
       $querystring['return-url'] = $this->view->get_url(NULL, $this->view->display[$_GET['attach']]->handler->get_path());
+    }
+    else {
+      $return_path = $this->get_option('return_path');
+      $querystring['return-url'] = isset($return_path) ? $return_path : NULL;
     }
 
     //Set the batch off
