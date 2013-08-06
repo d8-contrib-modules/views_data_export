@@ -51,7 +51,7 @@ class CSVExportViewsDataExportTests extends ViewsDataExportSimpleExportTest {
         'field' => 'id',
         'relationship' => 'none',
         // Add a label to include HTML
-        'label' => '<strong>ID</strong>',
+        'label' => '<strong id="id">ID</strong>',
       ),
       'name' => array(
         'id' => 'name',
@@ -76,7 +76,7 @@ class CSVExportViewsDataExportTests extends ViewsDataExportSimpleExportTest {
       'keep_html' => TRUE,
     );
 
-    $expected = '"<strong>ID</strong>","Name","Age"
+    $expected = '"<strong id=""id"">ID</strong>","Name","Age"
 "1","<em>John</em>","25"
 "2","<em>George</em>","27"
 "3","<em>Ringo</em>","28"
