@@ -268,3 +268,15 @@ function views_data_export_view_clear($export_id) {
     ->condition('eid', $export_id)
     ->execute();
 }
+
+/**
+ * Implements hook_file_presave().
+ */
+function views_data_export_file_presave($file) {
+  // Ensure temporary files really are temporary.
+  // @see: https://drupal.org/node/2198399
+  if (strpos($file->filename, 'views_data_export') === 0) {
+    // There is no FILE_STATUS_TEMPORARY.
+    $file->status = 0;
+  }
+}
