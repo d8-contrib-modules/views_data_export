@@ -4,7 +4,6 @@ description = "Plugin to export views data into various file formats"
 package = Views
 core = 7.x
 
-files[] = views_data_export.module
 dependencies[] = views
 
 ; Plugins
