@@ -264,14 +264,7 @@ function views_data_export_view_retrieve($export_id) {
  *   An export ID or an array of export IDs to clear from the object cache.
  */
 function views_data_export_view_clear($export_id) {
-  if (is_array($export_id)) {
-    db_delete('views_data_export_object_cache')
-    ->condition('eid', $export_id, 'IN')
-    ->execute();
-  }
-  else {
-    db_delete('views_data_export_object_cache')
+  db_delete('views_data_export_object_cache')
     ->condition('eid', $export_id)
     ->execute();
-  }
 }
