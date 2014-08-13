@@ -330,7 +330,7 @@ class views_data_export_plugin_style_export extends views_plugin_style {
       $count = 0;
       foreach ($view->display_handler->get_handlers('argument') as $arg => $handler) {
         $token = '%' . ++$count;
-        $tokens[$token . '-title'] = check_plain($handler->title());
+        $tokens[$token . '-title'] = $handler->get_title();
         $tokens[$token . '-value'] = isset($view->args[$count - 1]) ? check_plain($view->args[$count - 1]) : '';
       }
 
