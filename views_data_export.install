@@ -147,7 +147,7 @@ function views_data_export_requirements($phase) {
         case 'mysql':
         case 'mysqli':
           // Check the max allowed packet size.
-          $max_allowed_packet = db_result(db_query('SHOW VARIABLES WHERE variable_name = %s', array('max_allowed_packet')));
+          $max_allowed_packet = db_result(db_query("SHOW VARIABLES WHERE variable_name = '%s'", array('max_allowed_packet')));
           if (is_numeric($max_allowed_packet)) {
             if ($max_allowed_packet < (16 * 1024 * 1024)) {
               $requirements['views_data_export'] = array(
