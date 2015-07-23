@@ -475,14 +475,18 @@ function _views_data_export_xml_tag_clean($tag) {
 function _views_data_export_header_shared_preprocess(&$vars) {
   $view     = $vars['view'];
   $fields   = &$view->field;
-
+  $fields_info = $view->display_handler->get_option('fields');
   $vars['header'] = array();
   foreach ($fields as $key => $field) {
     if (empty($field->options['exclude'])) {
-      $vars['header'][$key] = check_plain($field->label());
+      if (isset($fields_info) && isset($fields_info[$key]['label'])) {
+        $vars['header'][$key] = check_plain($fields_info[$key]['label']);
+      }
+      else {
+        $vars['header'][$key] = check_plain($field->label());
+      }
     }
   }
-
 }
 
 /**
