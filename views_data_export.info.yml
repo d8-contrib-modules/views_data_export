@@ -1,0 +1,5 @@
+name: 'Views Data Export'
+type: module
+description: 'Plugin to export views data into various file formats'
+package: 'views'
+core: 8.x
