@@ -1,0 +1,63 @@
+<?php
+
+/**
+ * Implements hook_form_alter().
+ */
+function views_data_export_form_alter(&$form, $form_state, $form_id) {
+  if ($form_id == 'views_ui_edit_display_form') {
+
+    $storage = $form_state->getStorage();
+    $display = $storage['view']->getDisplay($storage['display_id']);
+    $csv_settings_defaults = $display['display_options']['style']['options']['csv_settings'];
+
+    $form['options']['style_options']['csv_settings'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('CSV Settings'),
+      '#states' => array(
+        'visible' => array(':input[name="style_options[formats][csv]"]' => array('checked' => TRUE)),
+      ),
+      'delimiter' => array(
+        '#type' => 'textfield',
+        '#title' => t('Delimiter'),
+        '#description' => t('Indicates the character used to delimit fields. Defaults to ",".'),
+        '#default_value' => !empty($csv_settings_defaults['delimiter']) ? $csv_settings_defaults['delimiter'] : ',',
+      ),
+      'enclosure' => array(
+        '#type' => 'textfield',
+        '#title' => t('Ensclosure'),
+        '#description' => t('Indicates the character used for field enclosure. Defaults to \'"\'.'),
+        '#default_value' => !empty($csv_settings_defaults['enclosure']) ? $csv_settings_defaults['enclosure'] : '"',
+      ),
+      'escape_char' => array(
+        '#type' => 'textfield',
+        '#title' => t('Escape Character'),
+        '#description' => t('Indicates the character used for escaping. Defaults to "\".'),
+        '#default_value' => !empty($csv_settings_defaults['escape_char']) ? $csv_settings_defaults['escape_char'] : '\\',
+      ),
+      'strip_tags' => array(
+        '#type' => 'checkbox',
+        '#title' => t('Strip HTML'),
+        '#description' => t('Strips HTML tags from CSV cell values.'),
+        '#default_value' => !empty($csv_settings_defaults['strip_tags']) ? $csv_settings_defaults['strip_tags'] : TRUE,
+      ),
+      'trim' => array(
+        '#type' => 'checkbox',
+        '#title' => t('Trim Whitespace'),
+        '#description' => t('Trims whitespace from beginning and end of CSV cell values.'),
+        '#default_value' => !empty($csv_settings_defaults['trim']) ? $csv_settings_defaults['trim'] : TRUE,
+      ),
+      'encoding' => array(
+        '#type' => 'radios',
+        '#title' => t('Encoding'),
+        '#description' => t('Determines the encoding used for CSV cell values.'),
+        '#options' => array(
+          'utf8' => t('UTF-8'),
+        ),
+        '#default_value' => !empty($csv_settings_defaults['encoding']) ? $csv_settings_defaults['encoding'] : 'utf8',
+      ),
+    );
+
+    // @todo Figure out how to pass this configuration to the Serialization Encoder object.
+    // @see https://www.drupal.org/node/2568413.
+  }
+}
