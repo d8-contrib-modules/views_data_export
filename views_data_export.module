@@ -67,7 +67,4 @@ function views_data_export_form_views_ui_edit_display_form_alter(array &$form, F
       '#default_value' => !empty($csv_settings_defaults['encoding']) ? $csv_settings_defaults['encoding'] : 'utf8',
     ),
   );
-
-  // @todo Figure out how to pass this configuration to the Serialization Encoder object.
-  // @see https://www.drupal.org/node/2568413.
 }
