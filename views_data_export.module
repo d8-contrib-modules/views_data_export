@@ -30,19 +30,19 @@ function views_data_export_form_views_ui_edit_display_form_alter(array &$form, F
     'delimiter' => array(
       '#type' => 'textfield',
       '#title' => t('Delimiter'),
-      '#description' => t('Indicates the character used to delimit fields. Defaults to ",".'),
+      '#description' => t('Indicates the character used to delimit fields. Defaults to a comma (<code>,</code>). For tab-separation use <code>\t</code> characters.'),
       '#default_value' => !empty($csv_settings_defaults['delimiter']) ? $csv_settings_defaults['delimiter'] : ',',
     ),
     'enclosure' => array(
       '#type' => 'textfield',
       '#title' => t('Ensclosure'),
-      '#description' => t('Indicates the character used for field enclosure. Defaults to \'"\'.'),
+      '#description' => t('Indicates the character used for field enclosure. Defaults to a double quote (<code>"</code>).'),
       '#default_value' => !empty($csv_settings_defaults['enclosure']) ? $csv_settings_defaults['enclosure'] : '"',
     ),
     'escape_char' => array(
       '#type' => 'textfield',
       '#title' => t('Escape Character'),
-      '#description' => t('Indicates the character used for escaping. Defaults to "\".'),
+      '#description' => t('Indicates the character used for escaping. Defaults to a backslash (<code>\</code>).'),
       '#default_value' => !empty($csv_settings_defaults['escape_char']) ? $csv_settings_defaults['escape_char'] : '\\',
     ),
     'strip_tags' => array(
