@@ -153,7 +153,7 @@ class DataExport extends Serializer {
     // Attach a link to the CSV feed, which is an alternate representation.
     $build['#attached']['html_head_link'][][] = [
       'rel' => 'alternate',
-      'type' => 'text/' . $type,
+      'type' => $this->displayHandler->getMimeType(),
       'title' => $title,
       'href' => $url,
     ];
