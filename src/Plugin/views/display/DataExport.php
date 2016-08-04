@@ -4,6 +4,8 @@ namespace Drupal\views_data_export\Plugin\views\display;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\rest\Plugin\views\display\RestExport;
+use Drupal\views\Entity\View;
+use Drupal\views\ViewEntityInterface;
 use Drupal\views\ViewExecutable;
 
 /**
@@ -24,6 +26,38 @@ use Drupal\views\ViewExecutable;
  * )
  */
 class DataExport extends RestExport {
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function buildResponse($view_id, $display_id, array $args = []) {
+    $response = parent::buildResponse($view_id, $display_id, $args);
+
+    // Add the content disposition header if a custom filename has been used.
+    // @todo Is there a way to retrieve an already-executed view?
+    $view = View::load($view_id);
+    /** @var \Drupal\views\Plugin\views\display\DisplayPluginInterface $display */
+    $display = $view->getDisplay($display_id);
+    if ($display['display_options']['filename']) {
+      $response->headers->set('Content-Disposition', 'attachment; filename="' . static::generateFilename($view, $display['display_options']['filename']) . '"');
+    }
+    return $response;
+  }
+
+  /**
+   * Given a filename and a view, generate a filename.
+   *
+   * @param \Drupal\views\ViewExecutable $view
+   *   The views executable.
+   * @param $filename_pattern
+   *   The filename, which may contain replacement tokens.
+   * @return string
+   *   The filename with any tokens replaced.
+   */
+  protected static function generateFilename(ViewEntityInterface $view, $filename_pattern) {
+    // @todo Support replacement patterns.
+    return $filename_pattern;
+  }
 
   /**
    * {@inheritdoc}
@@ -67,6 +101,11 @@ class DataExport extends RestExport {
       'title' => $this->t('Attach to'),
       'value' => $attach_to,
     );
+
+    // Add filename to the summary if set.
+    if ($this->getOption('filename')) {
+      $options['path']['value'] .= $this->t(' (@filename)', ['@filename' => $this->getOption('filename')]);
+    }
   }
     /**
    * {@inheritdoc}
@@ -78,6 +117,15 @@ class DataExport extends RestExport {
     switch ($form_state->get('section')) {
       case 'style':
         unset($form['style']['type']['#options']['serializer']);
+        break;
+
+      case 'path':
+        $form['filename'] = [
+          '#type' => 'textfield',
+          '#title' => $this->t('Filename'),
+          '#default_value' => $this->options['filename'],
+          '#description' => $this->t('The filename that will be suggested to the browser for downloading purposes. You may include replacement patterns from the list below.'),
+        ];
         break;
 
       case 'displays':
@@ -134,6 +182,10 @@ class DataExport extends RestExport {
     switch ($section) {
       case 'displays':
         $this->setOption($section, $form_state->getValue($section));
+        break;
+
+      case 'path':
+        $this->setOption('filename', $form_state->getValue('filename'));
         break;
     }
   }
