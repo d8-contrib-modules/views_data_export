@@ -3,6 +3,7 @@
 namespace Drupal\views_data_export\Plugin\views\display;
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\rest\Plugin\views\display\RestExport;
 use Drupal\views\Entity\View;
 use Drupal\views\ViewEntityInterface;
@@ -35,11 +36,14 @@ class DataExport extends RestExport {
 
     // Add the content disposition header if a custom filename has been used.
     // @todo Is there a way to retrieve an already-executed view?
-    $view = View::load($view_id);
+    $view = View::load($view_id)->getExecutable();
+    $view->setDisplay($display_id);
     /** @var \Drupal\views\Plugin\views\display\DisplayPluginInterface $display */
-    $display = $view->getDisplay($display_id);
-    if ($display['display_options']['filename']) {
-      $response->headers->set('Content-Disposition', 'attachment; filename="' . static::generateFilename($view, $display['display_options']['filename']) . '"');
+    $display = $view->getDisplay();
+    if ($display->getOption('filename')) {
+      $bubbleable_metadata = new BubbleableMetadata();
+      $response->headers->set('Content-Disposition', 'attachment; filename="' . static::generateFilename($view, $display->getOption('filename'), $bubbleable_metadata) . '"');
+      $response->addCacheableDependency($bubbleable_metadata);
     }
     return $response;
   }
@@ -51,12 +55,13 @@ class DataExport extends RestExport {
    *   The views executable.
    * @param $filename_pattern
    *   The filename, which may contain replacement tokens.
-   * @return string
-   *   The filename with any tokens replaced.
+   * @param \Drupal\Core\Render\BubbleableMetadata $bubbleable_metadata
+   *   Cache metadata.
+   * @return string The filename with any tokens replaced.
+   * The filename with any tokens replaced.
    */
-  protected static function generateFilename(ViewEntityInterface $view, $filename_pattern) {
-    // @todo Support replacement patterns.
-    return $filename_pattern;
+  protected static function generateFilename(ViewExecutable $view, $filename_pattern, BubbleableMetadata $bubbleable_metadata) {
+    return \Drupal::token()->replace($filename_pattern, array('view' => $view), [], $bubbleable_metadata);
   }
 
   /**
@@ -126,6 +131,8 @@ class DataExport extends RestExport {
           '#default_value' => $this->options['filename'],
           '#description' => $this->t('The filename that will be suggested to the browser for downloading purposes. You may include replacement patterns from the list below.'),
         ];
+        // Support tokens.
+        $this->globalTokenForm($form, $form_state);
         break;
 
       case 'displays':
