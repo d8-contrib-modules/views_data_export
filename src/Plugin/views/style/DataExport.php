@@ -2,7 +2,9 @@
 
 namespace Drupal\views_data_export\Plugin\views\style;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\rest\Plugin\views\style\Serializer;
 
 /**
@@ -105,7 +107,56 @@ class DataExport extends Serializer {
           ],
         ];
     }
+  }
 
+  /**
+   * {@inheritdoc}
+   *
+   * @todo This should implement AttachableStyleInterface once
+   * https://www.drupal.org/node/2779205 lands.
+   */
+  public function attachTo(array &$build, $display_id, Url $url, $title) {
+    // @todo This mostly hard-codes CSV handling. Figure out how to abstract.
+
+    $url_options = [];
+    $input = $this->view->getExposedInput();
+    if ($input) {
+      $url_options['query'] = $input;
+    }
+    $url_options['absolute'] = TRUE;
+
+    $url = $url->setOptions($url_options)->toString();
+
+    // Add the CSV icon to the view.
+    $type = $this->displayHandler->getContentType();
+    $this->view->feedIcons[] = [
+      '#theme' => 'feed_icon',
+      '#url' => $url,
+      '#title' => $title,
+      '#theme_wrappers' => [
+        'container' => [
+          '#attributes' => [
+            'class' => [
+              Html::cleanCssIdentifier($type) . '-feed',
+              'views-data-export-feed',
+            ],
+          ],
+        ],
+      ],
+      '#attached' => [
+        'library' => [
+          'views_data_export/views_data_export',
+        ],
+      ],
+    ];
+
+    // Attach a link to the CSV feed, which is an alternate representation.
+    $build['#attached']['html_head_link'][][] = [
+      'rel' => 'alternate',
+      'type' => 'text/' . $type,
+      'title' => $title,
+      'href' => $url,
+    ];
   }
 
 }
