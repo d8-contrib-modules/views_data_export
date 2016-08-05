@@ -2,11 +2,10 @@
 
 namespace Drupal\views_data_export\Plugin\views\display;
 
+use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\Core\Cache\CacheableResponse;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\rest\Plugin\views\display\RestExport;
-use Drupal\views\Entity\View;
-use Drupal\views\ViewEntityInterface;
 use Drupal\views\ViewExecutable;
 
 /**
@@ -32,36 +31,52 @@ class DataExport extends RestExport {
    * {@inheritdoc}
    */
   public static function buildResponse($view_id, $display_id, array $args = []) {
-    $response = parent::buildResponse($view_id, $display_id, $args);
+    // Do not call the parent method, as it makes the response harder to alter.
+    // @see https://www.drupal.org/node/2779807
+    $build = static::buildBasicRenderable($view_id, $display_id, $args);
+
+    // Setup an empty response, so for example, the Content-Disposition header
+    // can be set.
+    $response = new CacheableResponse('', 200);
+    $build['#response'] = $response;
+
+    /** @var \Drupal\Core\Render\RendererInterface $renderer */
+    $renderer = \Drupal::service('renderer');
+
+    $output = (string) $renderer->renderRoot($build);
+
+    $response->setContent($output);
+    $cache_metadata = CacheableMetadata::createFromRenderArray($build);
+    $response->addCacheableDependency($cache_metadata);
+
+    $response->headers->set('Content-type', $build['#content_type']);
+
+    return $response;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function render() {
 
     // Add the content disposition header if a custom filename has been used.
-    // @todo Is there a way to retrieve an already-executed view?
-    $view = View::load($view_id)->getExecutable();
-    $view->setDisplay($display_id);
-    /** @var \Drupal\views\Plugin\views\display\DisplayPluginInterface $display */
-    $display = $view->getDisplay();
-    if ($display->getOption('filename')) {
-      $bubbleable_metadata = new BubbleableMetadata();
-      $response->headers->set('Content-Disposition', 'attachment; filename="' . static::generateFilename($view, $display->getOption('filename'), $bubbleable_metadata) . '"');
-      $response->addCacheableDependency($bubbleable_metadata);
+    if (($response = $this->view->getResponse()) && $this->getOption('filename')) {
+      $response->headers->set('Content-Disposition', 'attachment; filename="' . $this->generateFilename($this->getOption('filename')) . '"');
     }
-    return $response;
+
+    return parent::render();
   }
 
   /**
    * Given a filename and a view, generate a filename.
    *
-   * @param \Drupal\views\ViewExecutable $view
-   *   The views executable.
    * @param $filename_pattern
    *   The filename, which may contain replacement tokens.
-   * @param \Drupal\Core\Render\BubbleableMetadata $bubbleable_metadata
-   *   Cache metadata.
-   * @return string The filename with any tokens replaced.
-   * The filename with any tokens replaced.
+   * @return string
+   *   The filename with any tokens replaced.
    */
-  protected static function generateFilename(ViewExecutable $view, $filename_pattern, BubbleableMetadata $bubbleable_metadata) {
-    return \Drupal::token()->replace($filename_pattern, array('view' => $view), [], $bubbleable_metadata);
+  protected function generateFilename($filename_pattern) {
+    return $this->globalTokenReplace($filename_pattern);
   }
 
   /**
