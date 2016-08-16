@@ -2,6 +2,8 @@
 
 namespace Drupal\views_data_export\Plugin\views\display;
 
+use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\Core\Cache\CacheableResponse;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\rest\Plugin\views\display\RestExport;
 use Drupal\views\ViewExecutable;
@@ -24,6 +26,58 @@ use Drupal\views\ViewExecutable;
  * )
  */
 class DataExport extends RestExport {
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function buildResponse($view_id, $display_id, array $args = []) {
+    // Do not call the parent method, as it makes the response harder to alter.
+    // @see https://www.drupal.org/node/2779807
+    $build = static::buildBasicRenderable($view_id, $display_id, $args);
+
+    // Setup an empty response, so for example, the Content-Disposition header
+    // can be set.
+    $response = new CacheableResponse('', 200);
+    $build['#response'] = $response;
+
+    /** @var \Drupal\Core\Render\RendererInterface $renderer */
+    $renderer = \Drupal::service('renderer');
+
+    $output = (string) $renderer->renderRoot($build);
+
+    $response->setContent($output);
+    $cache_metadata = CacheableMetadata::createFromRenderArray($build);
+    $response->addCacheableDependency($cache_metadata);
+
+    $response->headers->set('Content-type', $build['#content_type']);
+
+    return $response;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function render() {
+
+    // Add the content disposition header if a custom filename has been used.
+    if (($response = $this->view->getResponse()) && $this->getOption('filename')) {
+      $response->headers->set('Content-Disposition', 'attachment; filename="' . $this->generateFilename($this->getOption('filename')) . '"');
+    }
+
+    return parent::render();
+  }
+
+  /**
+   * Given a filename and a view, generate a filename.
+   *
+   * @param $filename_pattern
+   *   The filename, which may contain replacement tokens.
+   * @return string
+   *   The filename with any tokens replaced.
+   */
+  protected function generateFilename($filename_pattern) {
+    return $this->globalTokenReplace($filename_pattern);
+  }
 
   /**
    * {@inheritdoc}
@@ -67,6 +121,11 @@ class DataExport extends RestExport {
       'title' => $this->t('Attach to'),
       'value' => $attach_to,
     );
+
+    // Add filename to the summary if set.
+    if ($this->getOption('filename')) {
+      $options['path']['value'] .= $this->t(' (@filename)', ['@filename' => $this->getOption('filename')]);
+    }
   }
     /**
    * {@inheritdoc}
@@ -78,6 +137,17 @@ class DataExport extends RestExport {
     switch ($form_state->get('section')) {
       case 'style':
         unset($form['style']['type']['#options']['serializer']);
+        break;
+
+      case 'path':
+        $form['filename'] = [
+          '#type' => 'textfield',
+          '#title' => $this->t('Filename'),
+          '#default_value' => $this->options['filename'],
+          '#description' => $this->t('The filename that will be suggested to the browser for downloading purposes. You may include replacement patterns from the list below.'),
+        ];
+        // Support tokens.
+        $this->globalTokenForm($form, $form_state);
         break;
 
       case 'displays':
@@ -134,6 +204,10 @@ class DataExport extends RestExport {
     switch ($section) {
       case 'displays':
         $this->setOption($section, $form_state->getValue($section));
+        break;
+
+      case 'path':
+        $this->setOption('filename', $form_state->getValue('filename'));
         break;
     }
   }
