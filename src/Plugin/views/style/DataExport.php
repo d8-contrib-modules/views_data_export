@@ -42,6 +42,21 @@ class DataExport extends Serializer {
     $options['xls_settings']['contains'] = [
       'xls_format' => ['default' => 'Excel2007'],
     ];
+    $options['xls_settings']['metadata']['contains'] = [
+      // The 'created' and 'modified' elements are not exposed here, as they
+      // default to the current time (that the spreadsheet is created), and
+      // would probably just confuse the UI.
+      'creator' => ['default' => ''],
+      'last_modified_by' => ['default' => ''],
+      'title' => ['default' => ''],
+      'description' => ['default' => ''],
+      'subject' => ['default' => ''],
+      'keywords' => ['default' => ''],
+      'category' => ['default' => ''],
+      'manager' => ['default' => ''],
+      'company' => ['default' => ''],
+      // @todo Expose a UI for custom properties.
+    ];
 
     return $options;
   }
@@ -65,8 +80,9 @@ class DataExport extends Serializer {
         // @todo Can these be moved to a plugin?
         $csv_options = $this->options['csv_settings'];
         $form['csv_settings'] = [
-          '#type' => 'fieldset',
-          '#title' => $this->t('CSV Settings'),
+          '#type' => 'details',
+          '#open' => FALSE,
+          '#title' => $this->t('CSV settings'),
           '#tree' => TRUE,
           '#states' => [
             'visible' => [':input[name="style_options[formats][csv]"]' => ['checked' => TRUE]],
@@ -116,8 +132,9 @@ class DataExport extends Serializer {
         // @todo Can these be moved to a plugin?
         $xls_options = $this->options['xls_settings'];
         $form['xls_settings'] = [
-          '#type' => 'fieldset',
-          '#title' => $this->t('CSV Settings'),
+          '#type' => 'details',
+          '#open' => FALSE,
+          '#title' => $this->t('XLS settings'),
           '#tree' => TRUE,
           '#states' => [
             'visible' => [':input[name="style_options[formats][xls]"]' => ['checked' => TRUE]],
@@ -130,9 +147,62 @@ class DataExport extends Serializer {
               'Excel2007' => $this->t('Excel 2007'),
               'Excel5' => $this->t('Excel 5'),
             ],
+            '#default_value' => $xls_options['xls_format'],
           ],
         ];
-
+        // XLS metadata.
+        $metadata = $xls_options['metadata'];
+        $form['xls_settings']['metadata'] = [
+          '#type' => 'details',
+          '#title' => $this->t('Document metadata'),
+          '#open' => !empty(array_filter($metadata)),
+        ];
+        $form['xls_settings']['metadata']['creator'] = [
+          '#type' => 'textfield',
+          '#title' => $this->t('Author/creator name'),
+          '#default_value' => $metadata['creator'],
+        ];
+        $form['xls_settings']['metadata']['last_modified_by'] = [
+          '#type' => 'textfield',
+          '#title' => $this->t('Last modified by'),
+          '#default_value' => $metadata['last_modified_by'],
+        ];
+        $form['xls_settings']['metadata']['title'] = [
+          '#type' => 'textfield',
+          '#title' => $this->t('Title'),
+          '#default_value' => $metadata['title'],
+        ];
+        $form['xls_settings']['metadata']['description'] = [
+          '#type' => 'textfield',
+          '#title' => $this->t('Description'),
+          '#default_value' => $metadata['description'],
+        ];
+        $form['xls_settings']['metadata']['subject'] = [
+          '#type' => 'textfield',
+          '#title' => $this->t('Subject'),
+          '#default_value' => $metadata['subject'],
+        ];
+        $form['xls_settings']['metadata']['keywords'] = [
+          '#type' => 'textfield',
+          '#title' => $this->t('Keywords'),
+          '#default_value' => $metadata['keywords'],
+        ];
+        $form['xls_settings']['metadata']['category'] = [
+          '#type' => 'textfield',
+          '#title' => $this->t('Category'),
+          '#default_value' => $metadata['category'],
+        ];
+        $form['xls_settings']['metadata']['manager'] = [
+          '#type' => 'textfield',
+          '#title' => $this->t('Manager'),
+          '#default_value' => $metadata['manager'],
+        ];
+        $form['xls_settings']['metadata']['company'] = [
+          '#type' => 'textfield',
+          '#title' => $this->t('Company'),
+          '#default_value' => $metadata['company'],
+        ];
+        break;
     }
   }
 
