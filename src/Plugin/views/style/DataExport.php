@@ -38,6 +38,11 @@ class DataExport extends Serializer {
       'encoding' => ['default' => 'utf8'],
     ];
 
+    // XLS options.
+    $options['xls_settings']['contains'] = [
+      'xls_format' => ['default' => 'Excel2007'],
+    ];
+
     return $options;
   }
 
@@ -106,6 +111,28 @@ class DataExport extends Serializer {
             '#default_value' => $csv_options['encoding'],
           ],
         ];
+
+        // XLS options.
+        // @todo Can these be moved to a plugin?
+        $xls_options = $this->options['xls_settings'];
+        $form['xls_settings'] = [
+          '#type' => 'fieldset',
+          '#title' => $this->t('CSV Settings'),
+          '#tree' => TRUE,
+          '#states' => [
+            'visible' => [':input[name="style_options[formats][xls]"]' => ['checked' => TRUE]],
+          ],
+          'xls_format' => [
+            '#type' => 'select',
+            '#title' => $this->t('Format'),
+            '#options' => [
+              // @todo Add all PHPExcel supported formats.
+              'Excel2007' => $this->t('Excel 2007'),
+              'Excel5' => $this->t('Excel 5'),
+            ],
+          ],
+        ];
+
     }
   }
 
