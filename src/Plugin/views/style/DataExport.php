@@ -80,6 +80,7 @@ class DataExport extends Serializer {
         // Change format to radios instead, since multiple formats here do not
         // make sense as they do for REST exports.
         $form['formats']['#type'] = 'radios';
+        $form['formats']['#default_value'] = reset($this->options['formats']);
 
         // CSV options.
         // @todo Can these be moved to a plugin?
@@ -209,6 +210,16 @@ class DataExport extends Serializer {
         ];
         break;
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function submitOptionsForm(&$form, FormStateInterface $form_state) {
+    // Transform the formats back into an array.
+    $format = $form_state->getValue(['style_options', 'formats']);
+    $form_state->setValue(['style_options', 'formats'], [$format => $format]);
+    parent::submitOptionsForm($form, $form_state);
   }
 
   /**
