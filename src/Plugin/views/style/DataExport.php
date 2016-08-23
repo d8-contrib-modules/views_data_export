@@ -76,6 +76,11 @@ class DataExport extends Serializer {
 
     switch ($form_state->get('section')) {
       case 'style_options':
+
+        // Change format to radios instead, since multiple formats here do not
+        // make sense as they do for REST exports.
+        $form['formats']['#type'] = 'radios';
+
         // CSV options.
         // @todo Can these be moved to a plugin?
         $csv_options = $this->options['csv_settings'];
@@ -85,7 +90,7 @@ class DataExport extends Serializer {
           '#title' => $this->t('CSV settings'),
           '#tree' => TRUE,
           '#states' => [
-            'visible' => [':input[name="style_options[formats][csv]"]' => ['checked' => TRUE]],
+            'visible' => [':input[name="style_options[formats]"]' => ['value' => 'csv']],
           ],
           'delimiter' => [
             '#type' => 'textfield',
@@ -137,7 +142,7 @@ class DataExport extends Serializer {
           '#title' => $this->t('XLS settings'),
           '#tree' => TRUE,
           '#states' => [
-            'visible' => [':input[name="style_options[formats][xls]"]' => ['checked' => TRUE]],
+            'visible' => [':input[name="style_options[formats]"]' => ['value' => 'xls']],
           ],
           'xls_format' => [
             '#type' => 'select',
