@@ -76,6 +76,12 @@ class DataExport extends Serializer {
 
     switch ($form_state->get('section')) {
       case 'style_options':
+
+        // Change format to radios instead, since multiple formats here do not
+        // make sense as they do for REST exports.
+        $form['formats']['#type'] = 'radios';
+        $form['formats']['#default_value'] = reset($this->options['formats']);
+
         // CSV options.
         // @todo Can these be moved to a plugin?
         $csv_options = $this->options['csv_settings'];
@@ -85,7 +91,7 @@ class DataExport extends Serializer {
           '#title' => $this->t('CSV settings'),
           '#tree' => TRUE,
           '#states' => [
-            'visible' => [':input[name="style_options[formats][csv]"]' => ['checked' => TRUE]],
+            'visible' => [':input[name="style_options[formats]"]' => ['value' => 'csv']],
           ],
           'delimiter' => [
             '#type' => 'textfield',
@@ -137,7 +143,7 @@ class DataExport extends Serializer {
           '#title' => $this->t('XLS settings'),
           '#tree' => TRUE,
           '#states' => [
-            'visible' => [':input[name="style_options[formats][xls]"]' => ['checked' => TRUE]],
+            'visible' => [':input[name="style_options[formats]"]' => ['value' => 'xls']],
           ],
           'xls_format' => [
             '#type' => 'select',
@@ -204,6 +210,16 @@ class DataExport extends Serializer {
         ];
         break;
     }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function submitOptionsForm(&$form, FormStateInterface $form_state) {
+    // Transform the formats back into an array.
+    $format = $form_state->getValue(['style_options', 'formats']);
+    $form_state->setValue(['style_options', 'formats'], [$format => $format]);
+    parent::submitOptionsForm($form, $form_state);
   }
 
   /**
