@@ -101,13 +101,13 @@ class DataExport extends Serializer {
           ],
           'enclosure' => [
             '#type' => 'textfield',
-            '#title' => $this->t('Ensclosure'),
+            '#title' => $this->t('Enclosure'),
             '#description' => $this->t('Indicates the character used for field enclosure. Defaults to a double quote (<code>"</code>).'),
             '#default_value' => $csv_options['enclosure'],
           ],
           'escape_char' => [
             '#type' => 'textfield',
-            '#title' => $this->t('Escape Character'),
+            '#title' => $this->t('Escape character'),
             '#description' => $this->t('Indicates the character used for escaping. Defaults to a backslash (<code>\</code>).'),
             '#default_value' => $csv_options['escape_char'],
           ],
@@ -119,7 +119,7 @@ class DataExport extends Serializer {
           ],
           'trim' => [
             '#type' => 'checkbox',
-            '#title' => $this->t('Trim Whitespace'),
+            '#title' => $this->t('Trim whitespace'),
             '#description' => $this->t('Trims whitespace from beginning and end of CSV cell values.'),
             '#default_value' => $csv_options['trim'],
           ],
