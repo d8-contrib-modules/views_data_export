@@ -126,6 +126,12 @@ class DataExport extends RestExport {
     if ($this->getOption('filename')) {
       $options['path']['value'] .= $this->t(' (@filename)', ['@filename' => $this->getOption('filename')]);
     }
+
+    // Display the selected format from the style plugin if available.
+    $style_options = $this->getOption('style')['options'];
+    if (!empty($style_options['formats'])) {
+      $options['style']['value'] .= $this->t(' (@export_format)', ['@export_format' => reset($style_options['formats'])]);
+    }
   }
     /**
    * {@inheritdoc}
